@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Attendance Reports</h4>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="mb-4">
+                    <div class="row align-items-end">
+                        <div class="col-md-4">
+                            <label for="date" class="form-label">Select Date</label>
+                            <input type="date" class="form-control" id="date" name="date" value="{{ date }}">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-info">
+                                <i class="fas fa-search me-1"></i>View Report
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0">Present Students ({{ attendance|length }})</h6>
+                            </div>
+                            <div class="card-body">
+                                {% if attendance %}
+                                    <div class="list-group list-group-flush">
+                                        {% for student_id, record in attendance.items() %}
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="attendance-status present"></span>
+                                                    <strong>{{ record.name }}</strong>
+                                                    <small class="text-muted d-block">ID: {{ student_id }}</small>
+                                                </div>
+                                                <small class="text-muted">
+                                                    {{ record.timestamp[:19].replace('T', ' ') }}
+                                                </small>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted mb-0">No students marked present on this date.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h6 class="mb-0">Absent Students</h6>
+                            </div>
+                            <div class="card-body">
+                                {% set absent_students = [] %}
+                                {% for student_id, name in all_students.items() %}
+                                    {% if student_id not in attendance %}
+                                        {% set _ = absent_students.append((student_id, name)) %}
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if absent_students %}
+                                    <div class="list-group list-group-flush">
+                                        {% for student_id, name in absent_students %}
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="attendance-status absent"></span>
+                                                    <strong>{{ name }}</strong>
+                                                    <small class="text-muted d-block">ID: {{ student_id }}</small>
+                                                </div>
+                                                <span class="badge bg-danger">Absent</span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted mb-0">All enrolled students are present!</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Attendance Summary for {{ date }}</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-3">
+                                        <div class="border rounded p-3 bg-light">
+                                            <h4 class="text-primary mb-0">{{ all_students|length }}</h4>
+                                            <small class="text-muted">Total Students</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="border rounded p-3 bg-light">
+                                            <h4 class="text-success mb-0">{{ attendance|length }}</h4>
+                                            <small class="text-muted">Present</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="border rounded p-3 bg-light">
+                                            <h4 class="text-danger mb-0">{{ all_students|length - attendance|length }}</h4>
+                                            <small class="text-muted">Absent</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="border rounded p-3 bg-light">
+                                            {% set attendance_percentage = ((attendance|length / all_students|length) * 100) if all_students|length > 0 else 0 %}
+                                            <h4 class="text-info mb-0">{{ "%.1f"|format(attendance_percentage) }}%</h4>
+                                            <small class="text-muted">Attendance Rate</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <h6>Export Options</h6>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-outline-primary" onclick="exportToCSV()">
+                                            <i class="fas fa-file-csv me-1"></i>Export CSV
+                                        </button>
+                                        <button type="button" class="btn btn-outline-info" onclick="printReport()">
+                                            <i class="fas fa-print me-1"></i>Print Report
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly/Weekly View -->
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Quick Date Navigation</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="btn-group mb-3" role="group">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="navigateDate(-1)">
+                                        <i class="fas fa-chevron-left me-1"></i>Previous Day
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary" onclick="navigateToToday()">
+                                        <i class="fas fa-calendar-day me-1"></i>Today
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="navigateDate(1)">
+                                        Next Day<i class="fas fa-chevron-right ms-1"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Recent Attendance Trends</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Present</th>
+                                                        <th>Total</th>
+                                                        <th>Rate</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="trendsTable">
+                                                    <!-- Will be populated by JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Student Attendance Overview</h6>
+                                        <div class="student-overview">
+                                            {% for student_id, name in all_students.items() %}
+                                                <div class="d-flex justify-content-between align-items-center py-1">
+                                                    <span>{{ name }}</span>
+                                                    <div>
+                                                        {% if student_id in attendance %}
+                                                            <span class="badge bg-success">Present</span>
+                                                        {% else %}
+                                                            <span class="badge bg-danger">Absent</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function exportToCSV() {
+    const date = '{{ date }}';
+    let csvContent = 'Student ID,Student Name,Status,Timestamp\n';
+    
+    // Add present students
+    {% for student_id, record in attendance.items() %}
+    csvContent += '{{ student_id }},{{ record.name }},Present,{{ record.timestamp }}\n';
+    {% endfor %}
+    
+    // Add absent students
+    {% for student_id, name in all_students.items() %}
+        {% if student_id not in attendance %}
+        csvContent += '{{ student_id }},{{ name }},Absent,\n';
+        {% endif %}
+    {% endfor %}
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `attendance_report_${date}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+function printReport() {
+    window.print();
+}
+
+function navigateDate(days) {
+    const currentDate = new Date('{{ date }}');
+    currentDate.setDate(currentDate.getDate() + days);
+    const newDate = currentDate.toISOString().split('T')[0];
+    window.location.href = `{{ url_for('reports_page') }}?date=${newDate}`;
+}
+
+function navigateToToday() {
+    const today = new Date().toISOString().split('T')[0];
+    window.location.href = `{{ url_for('reports_page') }}?date=${today}`;
+}
+
+// Load recent trends (mock data for demonstration)
+document.addEventListener('DOMContentLoaded', function() {
+    const trendsTable = document.getElementById('trendsTable');
+    const currentDate = new Date('{{ date }}');
+    
+    // Generate last 7 days of mock trend data
+    for (let i = 6; i >= 0; i--) {
+        const date = new Date(currentDate);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        
+        // Mock data - in real implementation, this would come from the server
+        const totalStudents = {{ all_students|length }};
+        const presentCount = Math.floor(Math.random() * totalStudents) + Math.floor(totalStudents * 0.5);
+        const rate = ((presentCount / totalStudents) * 100).toFixed(1);
+        
+        const row = document.createElement('tr');
+        if (dateStr === '{{ date }}') {
+            row.classList.add('table-active');
+        }
+        
+        row.innerHTML = `
+            <td>${dateStr}</td>
+            <td><span class="badge bg-success">${presentCount}</span></td>
+            <td>${totalStudents}</td>
+            <td>${rate}%</td>
+        `;
+        trendsTable.appendChild(row);
+    }
+});
+</script>
+
+<style media="print">
+@media print {
+    .btn, .navbar, .card-header, .btn-group { display: none !important; }
+    .card { border: none !important; box-shadow: none !important; }
+    body { font-size: 12px; }
+    .no-print { display: none !important; }
+    
+    .attendance-status {
+        display: inline-block !important;
+        width: 8px !important;
+        height: 8px !important;
+        border-radius: 50% !important;
+        margin-right: 5px !important;
+    }
+    
+    .present { background-color: #000 !important; }
+    .absent { background-color: #666 !important; }
+}
+</style>
+{% endblock %}

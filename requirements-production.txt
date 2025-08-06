@@ -1,0 +1,10 @@
+# Production requirements with specific versions
+Flask==3.0.0
+librosa==0.10.1
+soundfile==0.12.1
+scikit-learn==1.3.2
+numpy==1.24.4
+Werkzeug==3.0.1
+pickle-mixin==1.0.2
+gunicorn==21.2.0  # Production WSGI server
+python-dotenv==1.0.0  # Environment variables

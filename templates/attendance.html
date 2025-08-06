@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-check-circle me-2"></i>Mark Attendance</h4>
+            </div>
+            <div class="card-body">
+                {% if students %}
+                    <form method="POST" action="{{ url_for('mark_attendance') }}" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="student_id" class="form-label">Select Student</label>
+                            <select class="form-select" id="student_id" name="student_id" required>
+                                <option value="">Choose a student...</option>
+                                {% for student_id, name in students.items() %}
+                                    <option value="{{ student_id }}">{{ name }} ({{ student_id }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Voice Verification</label>
+                            <div class="voice-recorder" id="voiceRecorder">
+                                <div id="recordingStatus">
+                                    <i class="fas fa-microphone fa-3x text-success mb-3"></i>
+                                    <h5>Record Your Voice</h5>
+                                    <p class="text-muted">Speak clearly for 3-5 seconds for voice verification</p>
+                                    <button type="button" id="recordBtn" class="btn btn-success mb-3">
+                                        <i class="fas fa-microphone me-2"></i>Start Recording
+                                    </button>
+                                    <button type="button" id="stopBtn" class="btn btn-danger mb-3" style="display: none;">
+                                        <i class="fas fa-stop me-2"></i>Stop Recording
+                                    </button>
+                                    <div id="recordingTime" class="text-muted" style="display: none;">
+                                        Recording: <span id="timer">0</span>s
+                                    </div>
+                                    <div class="audio-playback" id="audioPlayback">
+                                        <audio controls style="width: 100%; margin-top: 10px;">
+                                            Your browser does not support the audio element.
+                                        </audio>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="voice_sample" class="form-label">Or Upload Audio File</label>
+                                <input type="file" class="form-control" id="voice_sample" name="voice_sample" 
+                                       accept=".wav,.mp3,.flac,.m4a" required>
+                                <div class="form-text">Upload your voice sample for verification</div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle me-2"></i>Mark Attendance
+                            </button>
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="text-center">
+                        <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                        <h5>No Students Enrolled</h5>
+                        <p class="text-muted">You need to enroll students before marking attendance.</p>
+                        <a href="{{ url_for('enroll_page') }}" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-2"></i>Enroll Students
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='attendance.js') }}"></script>
+{% endblock %}
