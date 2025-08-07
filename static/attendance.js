@@ -1,40 +1,30 @@
-let mediaRecorder;
-let audioChunks = [];
-let audioBlob;
-let recordingTimer;
-let startTime;
+let mediaRecorder, audioChunks = [], audioBlob;
+let recordingTimer, startTime;
 
 const recordBtn = document.getElementById('recordBtn');
-const stopBtn = document.getElementById('stopBtn');
-const audioPlayback = document.querySelector('#audioPlayback audio');
 const voiceFileInput = document.getElementById('voice_sample');
 const attendanceForm = document.querySelector('form');
-const recordingTime = document.getElementById('recordingTime');
 const timer = document.getElementById('timer');
 
-// Audio configuration for librosa
-const audioConfig = {
-    audio: {
-        channelCount: 1,
-        sampleRate: 22050,
-        sampleSize: 16
-    }
-};
+// Audio config for librosa compatibility
+const audioConfig = { audio: { channelCount: 1, sampleRate: 22050, sampleSize: 16 } };
 
-// Initialize
 document.addEventListener('DOMContentLoaded', function() {
-    // Hide audio playback initially
-    document.getElementById('audioPlayback').style.display = 'none';
-    
-    // Check browser compatibility
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if (!navigator.mediaDevices?.getUserMedia) {
         recordBtn.disabled = true;
-        recordBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Browser not supported';
+        recordBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Not supported';
     }
 });
 
-recordBtn.addEventListener('click', startRecording);
-stopBtn.addEventListener('click', stopRecording);
+recordBtn.addEventListener('click', toggleRecording);
+
+async function toggleRecording() {
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+        startRecording();
+    } else {
+        stopRecording();
+    }
+}
 
 async function startRecording() {
     try {
@@ -42,93 +32,103 @@ async function startRecording() {
         mediaRecorder = new MediaRecorder(stream);
         audioChunks = [];
         
-        mediaRecorder.ondataavailable = (event) => {
-            audioChunks.push(event.data);
-        };
-        
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
         mediaRecorder.onstop = async () => {
             const webmBlob = new Blob(audioChunks, { type: 'audio/webm' });
             audioBlob = await convertToWav(webmBlob);
             
-            // Show audio playback
-            audioPlayback.src = URL.createObjectURL(audioBlob);
-            document.getElementById('audioPlayback').style.display = 'block';
-            
-            // Make voice file input optional since we have recording
+            showAudioPlayback();
             voiceFileInput.required = false;
-            
-            // Stop all tracks
             stream.getTracks().forEach(track => track.stop());
-            
-            // Clear timer
             clearInterval(recordingTimer);
-            recordingTime.style.display = 'none';
+            document.getElementById('recordingTime').style.display = 'none';
+            
+            recordBtn.className = 'btn btn-success mb-3';
+            recordBtn.innerHTML = '<i class="fas fa-check me-2"></i>Voice Recorded';
         };
         
-        // Start recording
         mediaRecorder.start();
         startTime = Date.now();
         
-        // Update UI
-        recordBtn.style.display = 'none';
-        stopBtn.style.display = 'inline-block';
-        recordingTime.style.display = 'block';
+        recordBtn.className = 'btn btn-danger mb-3';
+        recordBtn.innerHTML = '<i class="fas fa-stop me-2"></i>Stop Recording';
+        document.getElementById('recordingTime').style.display = 'block';
         
-        // Start timer
-        recordingTimer = setInterval(updateTimer, 100);
+        recordingTimer = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            timer.textContent = elapsed;
+            if (elapsed >= 30) stopRecording(); // Auto-stop at 30s
+        }, 1000);
         
     } catch (error) {
-        console.error('Recording error:', error);
-        showAlert('Error accessing microphone. Please check permissions.', 'danger');
+        alert('Error accessing microphone. Please check permissions.');
     }
 }
 
 function stopRecording() {
     if (mediaRecorder && mediaRecorder.state !== 'inactive') {
         mediaRecorder.stop();
-        
-        // Update UI
-        recordBtn.style.display = 'inline-block';
-        stopBtn.style.display = 'none';
     }
 }
 
-function updateTimer() {
-    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-    timer.textContent = elapsed;
+function showAudioPlayback() {
+    const existing = document.getElementById('audioPlayback');
+    if (existing) existing.remove();
+    
+    const audioDiv = document.createElement('div');
+    audioDiv.id = 'audioPlayback';
+    audioDiv.className = 'mt-3';
+    audioDiv.innerHTML = `
+        <label class="form-label">Recorded Audio</label>
+        <audio controls style="width: 100%;"></audio>
+        <div class="mt-2">
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="reRecord()">
+                <i class="fas fa-redo me-1"></i>Re-record
+            </button>
+        </div>
+    `;
+    
+    audioDiv.querySelector('audio').src = URL.createObjectURL(audioBlob);
+    document.getElementById('recordingStatus').appendChild(audioDiv);
+    
+    // Insert after the recording section
 }
 
-// Convert WebM to WAV format
+function reRecord() {
+    audioBlob = null;
+    voiceFileInput.required = true;
+    
+    const audioPlayback = document.getElementById('audioPlayback');
+    if (audioPlayback) audioPlayback.remove();
+    
+    recordBtn.className = 'btn btn-record text-white mb-3';
+    recordBtn.innerHTML = '<i class="fas fa-microphone me-2"></i>Start Recording';
+}
+
+// Convert to WAV format (same as enroll.js)
 async function convertToWav(webmBlob) {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)({
-        sampleRate: 22050
-    });
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 22050 });
     
     return new Promise((resolve) => {
-        const fileReader = new FileReader();
-        fileReader.onload = async function(e) {
+        const reader = new FileReader();
+        reader.onload = async function(e) {
             try {
                 const audioBuffer = await audioContext.decodeAudioData(e.target.result);
-                const wavBlob = audioBufferToWav(audioBuffer);
-                resolve(wavBlob);
+                resolve(audioBufferToWav(audioBuffer));
             } catch (error) {
-                console.error('Conversion error:', error);
                 resolve(webmBlob);
             }
         };
-        fileReader.readAsArrayBuffer(webmBlob);
+        reader.readAsArrayBuffer(webmBlob);
     });
 }
 
 function audioBufferToWav(audioBuffer) {
     const sampleRate = 22050;
-    const numberOfChannels = 1;
+    let audioData = audioBuffer.getChannelData(0);
     
-    // Convert to mono
-    let audioData;
-    if (audioBuffer.numberOfChannels === 1) {
-        audioData = audioBuffer.getChannelData(0);
-    } else {
+    // Mix to mono if stereo
+    if (audioBuffer.numberOfChannels > 1) {
         const left = audioBuffer.getChannelData(0);
         const right = audioBuffer.getChannelData(1);
         audioData = new Float32Array(left.length);
@@ -138,8 +138,8 @@ function audioBufferToWav(audioBuffer) {
     }
     
     const length = audioData.length;
-    const arrayBuffer = new ArrayBuffer(44 + length * 2);
-    const view = new DataView(arrayBuffer);
+    const buffer = new ArrayBuffer(44 + length * 2);
+    const view = new DataView(buffer);
     
     // WAV header
     const writeString = (offset, string) => {
@@ -154,7 +154,7 @@ function audioBufferToWav(audioBuffer) {
     writeString(12, 'fmt ');
     view.setUint32(16, 16, true);
     view.setUint16(20, 1, true);
-    view.setUint16(22, numberOfChannels, true);
+    view.setUint16(22, 1, true);
     view.setUint32(24, sampleRate, true);
     view.setUint32(28, sampleRate * 2, true);
     view.setUint16(32, 2, true);
@@ -168,126 +168,118 @@ function audioBufferToWav(audioBuffer) {
         view.setInt16(44 + i * 2, sample * 0x7FFF, true);
     }
     
-    return new Blob([arrayBuffer], { type: 'audio/wav' });
+    return new Blob([buffer], { type: 'audio/wav' });
 }
 
-// Handle form submission with loading spinner
+// Handle form submission with proper FormData and spinner
 attendanceForm.addEventListener('submit', function(e) {
-    e.preventDefault();
+    e.preventDefault(); // Always prevent default
     
-    // Validate student selection
     const studentSelect = document.getElementById('student_id');
+    console.log('Student select element:', studentSelect);
+    console.log('Student select value:', studentSelect?.value);
+    
     if (!studentSelect.value) {
         showAlert('Please select a student', 'warning');
         return;
     }
     
-    // Check if we have audio (either recorded or uploaded)
     if (!audioBlob && !voiceFileInput.files.length) {
         showAlert('Please record your voice or upload an audio file', 'warning');
         return;
     }
     
     // Show loading spinner
-    showLoadingSpinner();
+    showLoading();
     
-    const formData = new FormData(this);
+    const formData = new FormData();
     
-    // Add recorded audio if available
+    // Explicitly add form fields
+    formData.append('student_id', studentSelect.value);
+    
+    // Add recorded audio or uploaded file
     if (audioBlob) {
         formData.append('recorded_audio', audioBlob, 'attendance_recording.wav');
+        console.log('Added recorded audio to form');
+    } else if (voiceFileInput.files.length > 0) {
+        formData.append('voice_sample', voiceFileInput.files[0]);
+        console.log('Added uploaded file to form');
     }
     
-    // Submit form
+    // Debug: Log what we're sending
+    console.log('FormData contents:');
+    for (let pair of formData.entries()) {
+        console.log('FormData:', pair[0], pair[1]);
+    }
+    
+    // Submit via fetch
     fetch(this.action, {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
-        hideLoadingSpinner();
-        
+        hideLoading();
         if (data.success) {
-            showAlert('Attendance marked successfully!', 'success');
-            // Reset form
+            showAlert(data.message || 'Attendance marked successfully!', 'success');
+            // Reset form after successful attendance
             resetForm();
         } else {
             showAlert(data.message || 'Attendance marking failed', 'danger');
         }
     })
     .catch(error => {
-        hideLoadingSpinner();
-        console.error('Upload error:', error);
+        hideLoading();
+        console.error('Error:', error);
         showAlert('Network error. Please try again.', 'danger');
     });
 });
 
-// Reset form function
 function resetForm() {
     attendanceForm.reset();
     audioBlob = null;
-    document.getElementById('audioPlayback').style.display = 'none';
-    audioPlayback.src = '';
     voiceFileInput.required = true;
-    recordBtn.style.display = 'inline-block';
-    stopBtn.style.display = 'none';
-    recordingTime.style.display = 'none';
+    
+    // Remove audio playback
+    const audioPlayback = document.getElementById('audioPlayback');
+    if (audioPlayback) audioPlayback.remove();
+    
+    // Reset record button
+    recordBtn.className = 'btn btn-record text-white mb-3';
+    recordBtn.innerHTML = '<i class="fas fa-microphone me-2"></i>Start Recording';
 }
 
-// Loading spinner functions
-function showLoadingSpinner() {
-    // Create loading overlay
-    const loadingOverlay = document.createElement('div');
-    loadingOverlay.id = 'loadingOverlay';
-    loadingOverlay.innerHTML = `
-        <div class="loading-content">
-            <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
-                <span class="visually-hidden">Loading...</span>
-            </div>
+function showLoading() {
+    const overlay = document.createElement('div');
+    overlay.id = 'loadingOverlay';
+    overlay.innerHTML = `
+        <div style="text-align: center; color: white;">
+            <div class="spinner-border text-success" style="width: 3rem; height: 3rem;"></div>
             <h5 class="mt-3">Processing Attendance...</h5>
-            <p class="text-muted">Verifying voice sample, please wait.</p>
+            <p>Verifying voice sample, please wait...</p>
         </div>
     `;
-    
-    // Add styles
-    loadingOverlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        color: white;
-        text-align: center;
+    overlay.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7); display: flex; justify-content: center;
+        align-items: center; z-index: 9999;
     `;
+    document.body.appendChild(overlay);
     
-    document.body.appendChild(loadingOverlay);
-    
-    // Disable form elements
-    const formElements = attendanceForm.querySelectorAll('input, select, button');
-    formElements.forEach(element => {
-        element.disabled = true;
-    });
+    // Disable form
+    attendanceForm.querySelectorAll('input, select, button').forEach(el => el.disabled = true);
 }
 
-function hideLoadingSpinner() {
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    if (loadingOverlay) {
-        loadingOverlay.remove();
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.remove();
     }
     
-    // Re-enable form elements
-    const formElements = attendanceForm.querySelectorAll('input, select, button');
-    formElements.forEach(element => {
-        element.disabled = false;
-    });
+    // Re-enable form
+    attendanceForm.querySelectorAll('input, select, button').forEach(el => el.disabled = false);
 }
 
-// Alert function
 function showAlert(message, type) {
     // Remove existing alerts
     const existingAlerts = document.querySelectorAll('.alert');
@@ -313,11 +305,21 @@ function showAlert(message, type) {
     }
 }
 
-// File input change handler
+// Handle file input change
 voiceFileInput.addEventListener('change', function() {
     if (this.files.length > 0) {
-        // If file is selected, make recording optional
         audioBlob = null;
-        document.getElementById('audioPlayback').style.display = 'none';
+        const audioPlayback = document.getElementById('audioPlayback');
+        if (audioPlayback) audioPlayback.remove();
+        recordBtn.className = 'btn btn-record text-white mb-3';
+        recordBtn.innerHTML = '<i class="fas fa-microphone me-2"></i>Start Recording';
     }
 });
+
+// Add CSS
+const style = document.createElement('style');
+style.textContent = `
+    .btn-record { background-color: #007bff; border-color: #007bff; }
+    .btn-record:hover { background-color: #0056b3; border-color: #0056b3; }
+`;
+document.head.appendChild(style);
