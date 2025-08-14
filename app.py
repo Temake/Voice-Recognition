@@ -3,7 +3,7 @@ from flask import Flask, redirect, url_for
 import os
 from config.routes import config
 from datetime import datetime
-
+from config.constants import *
 app = Flask(__name__)
 
 # Production security configuration
