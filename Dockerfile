@@ -1,5 +1,5 @@
 # Use stable Python version with good scientific package support
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -40,4 +40,4 @@ RUN useradd --create-home --shell /bin/bash app && chown -R app:app /app
 USER app
 
 # Start the app with Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--timeout", "120", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120", "app:app"]
