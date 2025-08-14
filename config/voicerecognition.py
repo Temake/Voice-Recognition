@@ -193,12 +193,12 @@ class EnhancedVoiceRecognitionSystem:
             return False, f"Enrollment failed: {message}"
         
         # Store voice model with metadata
-        enrollment_hash = hashlib.sha256(f"{student_id}{student_name}{datetime.now().isoformat()}".encode()).hexdigest()
+        enrollment_hash = hashlib.sha256(f"{student_id}{student_name}{datetime.datetime.now().isoformat()}".encode()).hexdigest()
         
         self.voice_models[student_id] = {
             'name': student_name,
             'features': features.tolist(),
-            'enrollment_date': datetime.now().isoformat(),
+            'enrollment_date': datetime.datetime.now().isoformat(),
             'enrollment_hash': enrollment_hash,
             'feature_version': '2.0',  # Version tracking
             'verification_count': 0
@@ -287,7 +287,7 @@ class EnhancedVoiceRecognitionSystem:
         if combined_similarity >= threshold:
             # Update verification count
             self.voice_models[student_id]['verification_count'] += 1
-            self.voice_models[student_id]['last_verification'] = datetime.now().isoformat()
+            self.voice_models[student_id]['last_verification'] = datetime.datetime.now().isoformat()
             self.save_voice_models()
             
             self.security_manager.log_security_event(
@@ -332,8 +332,8 @@ class EnhancedVoiceRecognitionSystem:
             return False, message
         
         student_name = self.voice_models[student_id]['name']
-        today = datetime.now().strftime('%Y-%m-%d')
-        timestamp = datetime.now().isoformat()
+        today = datetime.datetime.now().strftime('%Y-%m-%d')
+        timestamp = datetime.datetime.now().isoformat()
         
         # Check if already marked today
         if today in self.attendance_records:

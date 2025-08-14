@@ -1,4 +1,4 @@
-# Use official Python image as base
+
 FROM python:3.13-slim
 
 # Set environment variables
@@ -8,10 +8,11 @@ ENV PYTHONUNBUFFERED=1
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies (including ffmpeg)
 RUN apt-get update && apt-get install -y \
     build-essential \
     libsndfile1 \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements

@@ -20,6 +20,7 @@ wheels/
 .installed.cfg
 *.egg
 
+voice_models.pkl
 # Virtual Environment
 env/
 venv/
