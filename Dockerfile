@@ -1,27 +1,39 @@
-# Dockerfile for containerized deployment
-FROM python:3.11-slim
+# Use official Python image as base
+FROM python:3.13-slim
 
-# Install system dependencies for audio processing
-RUN apt-get update && apt-get install -y \
-    libsndfile1 \
-    ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Set working directory
+# Set work directory
 WORKDIR /app
 
-# Copy requirements and install Python dependencies
-COPY requirements-production.txt .
-RUN pip install --no-cache-dir -r requirements-production.txt
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libsndfile1 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy application code
+# Copy requirements
+COPY requirements-production.txt requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Copy project files
 COPY . .
 
-# Create directory for data persistence
-RUN mkdir -p voice_samples
+# Create necessary folders
+RUN mkdir -p voice_samples uploads data
 
 # Expose port
 EXPOSE 5000
 
-# Run application
-CMD ["gunicorn", "main:app", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120"]
+# Set environment variables for Flask
+ENV FLASK_ENV=production
+ENV PORT=5000
+
+# Create a non-root user for security
+RUN useradd --create-home --shell /bin/bash app && chown -R app:app /app
+USER app
+
+# Start the app with Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--timeout", "120", "app:app"]

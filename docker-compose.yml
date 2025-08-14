@@ -1,21 +1,52 @@
-# Docker Compose for easy local testing
 version: '3.8'
 
 services:
-  voice-attendance:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: voiceattendance
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  voiceattendance:
     build: .
     ports:
       - "5000:5000"
-    volumes:
-      - ./voice_samples:/app/voice_samples
     environment:
-      - FLASK_DEBUG=false
-      - SECRET_KEY=your-secret-key-here
+      - SECRET_KEY=${SECRET_KEY:-change-this-secret-key-in-production}
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - UPLOAD_FOLDER=/app/voice_samples
+      - HOST=0.0.0.0
       - PORT=5000
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD:-password}@db:5432/voiceattendance
+    volumes:
+      # Persist voice samples and uploads
+      - ./voice_samples:/app/voice_samples
+      - ./uploads:/app/uploads
+      - ./data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
+    # Optional: Add health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # Optional: Add Redis for session storage in production
-  # redis:
-  #   image: redis:7-alpine
-  #   ports:
-  #     - "6379:6379"
+volumes:
+  postgres_data:
+

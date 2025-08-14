@@ -1,0 +1,60 @@
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environment
+env/
+venv/
+ENV/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Application specific
+uploads/
+voice_samples/
+data/
+*.db
+*.sqlite3
+*.log
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.staging
+
+# Documentation
+README.md
+*.md
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Development requirements
+requirements.txt
+ll.txt

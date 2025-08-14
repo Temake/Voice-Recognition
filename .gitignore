@@ -1,9 +1,57 @@
-.env
-.venv
-voice_samples/
-venv/
+# Python
 __pycache__/
-security_log.json
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+
+# Local development
+uploads/
+voice_samples/
+*.log
+ll.txt
+
+# Voice models and data (these will be created on Heroku)
 voice_models.pkl
 attendance_records.json
-ll.txt
+security_log.json
+
+# Temporary files
+*.tmp
+temp/

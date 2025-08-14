@@ -238,12 +238,12 @@ function navigateDate(days) {
     const currentDate = new Date('{{ date }}');
     currentDate.setDate(currentDate.getDate() + days);
     const newDate = currentDate.toISOString().split('T')[0];
-    window.location.href = `{{ url_for('reports_page') }}?date=${newDate}`;
+    window.location.href = `{{ url_for('config.reports_page') }}?date=${newDate}`;
 }
 
 function navigateToToday() {
     const today = new Date().toISOString().split('T')[0];
-    window.location.href = `{{ url_for('reports_page') }}?date=${today}`;
+    window.location.href = `{{ url_for('config.reports_page') }}?date=${today}`;
 }
 
 // Load recent trends (mock data for demonstration)
