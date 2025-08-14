@@ -1,109 +1,110 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12 mb-4">
-        <h1 class="display-6">
-            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-        </h1>
-        <p class="lead">Welcome to the Voice-based Student Attendance System</p>
+<div class="mb-8">
+    <div class="flex items-center mb-4">
+        <i class="fas fa-tachometer-alt text-3xl text-blue-600 mr-4"></i>
+        <div>
+            <h1 class="text-4xl font-bold text-gray-900">Dashboard</h1>
+            <p class="text-xl text-gray-600 mt-2">Welcome to the Voice-based Student Attendance System</p>
+        </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-6 mb-4">
-        <div class="card h-100">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Enrolled Students</h5>
-            </div>
-            <div class="card-body">
-                {% if students %}
-                    <div class="list-group list-group-flush">
-                        {% for student_id, name in students.items() %}
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>{{ name }}</strong>
-                                    <small class="text-muted d-block">ID: {{ student_id }}</small>
-                                </div>
-                                <span class="badge bg-secondary">Enrolled</span>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="bg-blue-600 text-white px-6 py-4">
+            <h5 class="text-lg font-semibold flex items-center">
+                <i class="fas fa-users mr-2"></i>Enrolled Students
+            </h5>
+        </div>
+        <div class="p-6">
+            {% if students %}
+                <div class="space-y-3">
+                    {% for student_id, name in students.items() %}
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div>
+                                <div class="font-semibold text-gray-900">{{ name }}</div>
+                                <div class="text-sm text-gray-500">ID: {{ student_id }}</div>
                             </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <p class="text-muted">No students enrolled yet.</p>
-                    <a href="{{ url_for('config.enroll_page') }}" class="btn btn-primary">
-                        <i class="fas fa-user-plus me-1"></i>Enroll First Student
+                            <span class="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-full">Enrolled</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center">
+                    <i class="fas fa-users text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 mb-4">No students enrolled yet.</p>
+                    <a href="{{ url_for('config.enroll_page') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-user-plus mr-2"></i>Enroll First Student
                     </a>
-                {% endif %}
-            </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 
-    <div class="col-md-6 mb-4">
-        <div class="card h-100">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Today's Attendance</h5>
-            </div>
-            <div class="card-body">
-                {% if attendance %}
-                    <div class="list-group list-group-flush">
-                        {% for student_id, record in attendance.items() %}
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="bg-green-600 text-white px-6 py-4">
+            <h5 class="text-lg font-semibold flex items-center">
+                <i class="fas fa-calendar-check mr-2"></i>Today's Attendance
+            </h5>
+        </div>
+        <div class="p-6">
+            {% if attendance %}
+                <div class="space-y-3">
+                    {% for student_id, record in attendance.items() %}
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="flex items-center">
+                                <span class="attendance-status present mr-3"></span>
                                 <div>
-                                    <span class="attendance-status present"></span>
-                                    <strong>{{ record.name }}</strong>
-                                    <small class="text-muted d-block">
+                                    <div class="font-semibold text-gray-900">{{ record.name }}</div>
+                                    <div class="text-sm text-gray-500">
                                         {{ record.timestamp[:19].replace('T', ' ') }}
-                                    </small>
+                                    </div>
                                 </div>
-                                <span class="badge bg-success">Present</span>
                             </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <p class="text-muted">No attendance marked today.</p>
+                            <span class="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">Present</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center">
+                    <i class="fas fa-calendar-check text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 mb-4">No attendance marked today.</p>
                     {% if students %}
-                        <a href="{{ url_for('config.attendance_page') }}" class="btn btn-success">
-                            <i class="fas fa-check-circle me-1"></i>Mark Attendance
+                        <a href="{{ url_for('config.attendance_page') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                            <i class="fas fa-check-circle mr-2"></i>Mark Attendance
                         </a>
                     {% endif %}
-                {% endif %}
-            </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Quick Actions</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <div class="d-grid">
-                            <a href="{{ url_for('config.enroll_page') }}" class="btn btn-primary btn-lg">
-                                <i class="fas fa-user-plus me-2"></i>Enroll New Student
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="d-grid">
-                            <a href="{{ url_for('config.attendance_page') }}" class="btn btn-success btn-lg">
-                                <i class="fas fa-check-circle me-2"></i>Mark Attendance
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="d-grid">
-                            <a href="{{ url_for('config.reports_page') }}" class="btn btn-info btn-lg">
-                                <i class="fas fa-chart-bar me-2"></i>View Reports
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="bg-cyan-600 text-white px-6 py-4">
+        <h5 class="text-lg font-semibold flex items-center">
+            <i class="fas fa-info-circle mr-2"></i>Quick Actions
+        </h5>
+    </div>
+    <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a href="{{ url_for('config.enroll_page') }}" class="block p-6 bg-blue-50 hover:bg-blue-100 rounded-lg text-center transition-colors group">
+                <i class="fas fa-user-plus text-3xl text-blue-600 mb-3 group-hover:scale-110 transition-transform"></i>
+                <h6 class="text-lg font-semibold text-blue-900 mb-2">Enroll New Student</h6>
+                <p class="text-blue-700 text-sm">Add students to the system</p>
+            </a>
+            <a href="{{ url_for('config.attendance_page') }}" class="block p-6 bg-green-50 hover:bg-green-100 rounded-lg text-center transition-colors group">
+                <i class="fas fa-check-circle text-3xl text-green-600 mb-3 group-hover:scale-110 transition-transform"></i>
+                <h6 class="text-lg font-semibold text-green-900 mb-2">Mark Attendance</h6>
+                <p class="text-green-700 text-sm">Record student attendance</p>
+            </a>
+            <a href="{{ url_for('config.reports_page') }}" class="block p-6 bg-cyan-50 hover:bg-cyan-100 rounded-lg text-center transition-colors group">
+                <i class="fas fa-chart-bar text-3xl text-cyan-600 mb-3 group-hover:scale-110 transition-transform"></i>
+                <h6 class="text-lg font-semibold text-cyan-900 mb-2">View Reports</h6>
+                <p class="text-cyan-700 text-sm">Analyze attendance data</p>
+            </a>
         </div>
     </div>
 </div>

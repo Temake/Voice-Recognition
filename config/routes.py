@@ -8,7 +8,12 @@ from datetime import datetime
 
 config = Blueprint('config', __name__, template_folder='../templates')
 
-@config.route('/')
+@config.route('/welcome')
+def welcome():
+    """Landing page for new users"""
+    return render_template('welcome.html')
+
+@config.route('/dashboard')
 def index():
     """Main dashboard with security overview"""
     students = voice_system.get_all_students()
@@ -216,4 +221,8 @@ def system_status():
         return jsonify(status)
     
     except Exception as e:
-        return json
+        return jsonify({
+            'system_ready': False,
+            'error': 'Failed to retrieve system status',
+            'message': str(e)
+        }), 500

@@ -1,56 +1,71 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i>Enroll New Student</h4>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="{{ url_for('config.enroll_student') }}" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="student_id" class="form-label">Student ID</label>
-                        <input type="text" class="form-control" id="student_id" name="student_id" required>
-                        <div class="form-text">Enter a unique student identifier</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="student_name" class="form-label">Student Name</label>
-                        <input type="text" class="form-control" id="student_name" name="student_name" required>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="form-label">Voice Sample</label>
-                        <div class="voice-recorder" id="voiceRecorder">
-                            <div id="recordingStatus">
-                                <i class="fas fa-microphone fa-3x text-primary mb-3"></i>
-                                <h5>Record Voice Sample</h5>
-                                <p class="text-muted">Click the button below to record a 5-10 second voice sample</p>
-                                <button type="button" id="recordBtn" class="btn btn-record text-white mb-3">
-                                    <i class="fas fa-microphone me-2"></i>Start Recording
-                                </button>
-                                <div id="recordingTime" class="text-muted" style="display: none;">
-                                    Recording: <span id="timer">0</span>s
-                                </div>
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="bg-blue-600 text-white px-6 py-4">
+            <h4 class="text-xl font-semibold flex items-center">
+                <i class="fas fa-user-plus mr-2"></i>Enroll New Student
+            </h4>
+        </div>
+        <div class="p-6">
+            <form method="POST" action="{{ url_for('config.enroll_student') }}" enctype="multipart/form-data" class="space-y-6">
+                <div>
+                    <label for="student_id" class="block text-sm font-medium text-gray-700 mb-2">Student ID</label>
+                    <input type="text" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+                           id="student_id" 
+                           name="student_id" 
+                           required>
+                    <p class="mt-1 text-sm text-gray-600">Enter a unique student identifier</p>
+                </div>
+                
+                <div>
+                    <label for="student_name" class="block text-sm font-medium text-gray-700 mb-2">Student Name</label>
+                    <input type="text" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-colors" 
+                           id="student_name" 
+                           name="student_name" 
+                           required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Voice Sample</label>
+                    <div class="voice-recorder bg-gray-50 rounded-lg p-6 text-center my-5" id="voiceRecorder">
+                        <div id="recordingStatus">
+                            <i class="fas fa-microphone text-5xl text-blue-600 mb-4"></i>
+                            <h5 class="text-lg font-semibold text-gray-900 mb-2">Record Voice Sample</h5>
+                            <p class="text-gray-600 mb-4">Click the button below to record a 5-10 second voice sample</p>
+                            <button type="button" 
+                                    id="recordBtn" 
+                                    class="btn-record text-white px-6 py-2 rounded-md font-medium hover:shadow-lg transition-all mb-4">
+                                <i class="fas fa-microphone mr-2"></i>Start Recording
+                            </button>
+                            <div id="recordingTime" class="text-gray-600 hidden">
+                                Recording: <span id="timer">0</span>s
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="voice_sample" class="form-label">Or Upload Audio File</label>
-                            <input type="file" class="form-control" id="voice_sample" name="voice_sample" 
-                                   accept=".wav,.mp3,.flac,.m4a" required>
-                            <div class="form-text">Supported formats: WAV, MP3, FLAC, M4A</div>
-                        </div>
                     </div>
                     
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-user-plus me-2"></i>Enroll Student
-                        </button>
+                    <div>
+                        <label for="voice_sample" class="block text-sm font-medium text-gray-700 mb-2">Or Upload Audio File</label>
+                        <input type="file" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors" 
+                               id="voice_sample" 
+                               name="voice_sample" 
+                               accept=".wav,.mp3,.flac,.m4a" 
+                               required>
+                        <p class="mt-1 text-sm text-gray-600">Supported formats: WAV, MP3, FLAC, M4A</p>
                     </div>
-                </form>
-            </div>
+                </div>
+                
+                <div>
+                    <button type="submit" 
+                            class="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        <i class="fas fa-user-plus mr-2"></i>Enroll Student
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div class="flex items-center">
+            <i class="fas fa-shield-alt text-3xl text-red-600 mr-4"></i>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Security Dashboard</h1>
+                <p class="text-gray-600 mt-1">Monitor system security events and activities</p>
+            </div>
+        </div>
+        <div class="flex space-x-3">
+            <button onclick="refreshSecurityData()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                <i class="fas fa-sync-alt mr-2"></i>Refresh
+            </button>
+            <button onclick="exportSecurityReport()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+                <i class="fas fa-download mr-2"></i>Export Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Security Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Successful Verifications</p>
+                    <p class="text-2xl font-bold text-green-600" id="successfulVerifications">
+                        {{ security_events|selectattr('event_type', 'equalto', 'SUCCESSFUL_VERIFICATION')|list|length }}
+                    </p>
+                </div>
+                <div class="p-3 bg-green-100 rounded-full">
+                    <i class="fas fa-check-circle text-green-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Failed Attempts</p>
+                    <p class="text-2xl font-bold text-red-600" id="failedAttempts">
+                        {{ security_events|selectattr('event_type', 'equalto', 'FAILED_VOICE_VERIFICATION')|list|length }}
+                    </p>
+                </div>
+                <div class="p-3 bg-red-100 rounded-full">
+                    <i class="fas fa-times-circle text-red-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Suspicious Activities</p>
+                    <p class="text-2xl font-bold text-yellow-600" id="suspiciousActivities">
+                        {{ security_events|selectattr('event_type', 'equalto', 'SUSPICIOUS_ACTIVITY_DETECTED')|list|length }}
+                    </p>
+                </div>
+                <div class="p-3 bg-yellow-100 rounded-full">
+                    <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Total Events</p>
+                    <p class="text-2xl font-bold text-blue-600" id="totalEvents">{{ security_events|length }}</p>
+                </div>
+                <div class="p-3 bg-blue-100 rounded-full">
+                    <i class="fas fa-list text-blue-600"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Events Timeline -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-history mr-2 text-gray-600"></i>Recent Security Events
+                </h2>
+                <div class="flex space-x-2">
+                    <select id="eventFilter" class="text-sm border border-gray-300 rounded-md px-3 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">All Events</option>
+                        <option value="FAILED_VOICE_VERIFICATION">Failed Verifications</option>
+                        <option value="SUSPICIOUS_ACTIVITY_DETECTED">Suspicious Activities</option>
+                        <option value="ENROLLMENT_REQUEST">Enrollment Requests</option>
+                        <option value="ATTENDANCE_REQUEST">Attendance Requests</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="divide-y divide-gray-200 max-h-96 overflow-y-auto" id="securityEventsList">
+            {% if security_events %}
+                {% for event in security_events %}
+                    <div class="p-4 hover:bg-gray-50 transition-colors security-event" data-event-type="{{ event.event_type }}">
+                        <div class="flex items-start space-x-3">
+                            <!-- Event Icon -->
+                            <div class="flex-shrink-0 mt-1">
+                                {% if event.event_type == 'FAILED_VOICE_VERIFICATION' %}
+                                    <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-times text-red-600 text-sm"></i>
+                                    </div>
+                                {% elif event.event_type == 'SUSPICIOUS_ACTIVITY_DETECTED' %}
+                                    <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-exclamation-triangle text-yellow-600 text-sm"></i>
+                                    </div>
+                                {% elif event.event_type == 'ENROLLMENT_REQUEST' %}
+                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user-plus text-blue-600 text-sm"></i>
+                                    </div>
+                                {% elif event.event_type == 'ATTENDANCE_REQUEST' %}
+                                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-check-circle text-green-600 text-sm"></i>
+                                    </div>
+                                {% else %}
+                                    <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-info-circle text-gray-600 text-sm"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Event Details -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between">
+                                    <p class="text-sm font-medium text-gray-900">
+                                        {{ event.event_type.replace('_', ' ').title() }}
+                                    </p>
+                                    <p class="text-xs text-gray-500">{{ event.timestamp }}</p>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">{{ event.details }}</p>
+                                <div class="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-user mr-1"></i>
+                                        Student: {{ event.student_id or 'Unknown' }}
+                                    </span>
+                                    <span class="flex items-center">
+                                        <i class="fas fa-map-marker-alt mr-1"></i>
+                                        IP: {{ event.ip_address or 'Unknown' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="p-8 text-center">
+                    <i class="fas fa-shield-alt text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-500">No security events found.</p>
+                    <p class="text-sm text-gray-400 mt-1">Security events will appear here as they occur.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Security Recommendations -->
+    <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6 border border-blue-200">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Security Recommendations
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-microphone text-blue-600"></i>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900">Voice Quality</h4>
+                    <p class="text-sm text-gray-600">Ensure recordings are clear and noise-free for better verification accuracy.</p>
+                </div>
+            </div>
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-clock text-green-600"></i>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900">Regular Monitoring</h4>
+                    <p class="text-sm text-gray-600">Check this dashboard regularly to identify unusual patterns or activities.</p>
+                </div>
+            </div>
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-users text-purple-600"></i>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900">User Training</h4>
+                    <p class="text-sm text-gray-600">Train users on proper voice recording techniques for better success rates.</p>
+                </div>
+            </div>
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-database text-red-600"></i>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900">Data Backup</h4>
+                    <p class="text-sm text-gray-600">Regularly backup voice models and attendance data to prevent data loss.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Filter security events
+document.getElementById('eventFilter').addEventListener('change', function() {
+    const filterValue = this.value;
+    const events = document.querySelectorAll('.security-event');
+    
+    events.forEach(event => {
+        if (filterValue === '' || event.dataset.eventType === filterValue) {
+            event.style.display = 'block';
+        } else {
+            event.style.display = 'none';
+        }
+    });
+});
+
+// Refresh security data
+function refreshSecurityData() {
+    // Show loading state
+    const refreshBtn = document.querySelector('button[onclick="refreshSecurityData()"]');
+    const originalText = refreshBtn.innerHTML;
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Refreshing...';
+    refreshBtn.disabled = true;
+    
+    // Simulate refresh (in real app, this would fetch new data)
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+}
+
+// Export security report
+function exportSecurityReport() {
+    const events = {{ security_events|tojson }};
+    let csvContent = 'Timestamp,Event Type,Student ID,Details,IP Address\n';
+    
+    events.forEach(event => {
+        const row = [
+            event.timestamp,
+            event.event_type,
+            event.student_id || '',
+            `"${event.details || ''}"`,
+            event.ip_address || ''
+        ].join(',');
+        csvContent += row + '\n';
+    });
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `security_report_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+// Auto-refresh every 30 seconds
+setInterval(() => {
+    // In a real application, you would fetch new data via AJAX
+    // For demo purposes, we'll just update the timestamp
+    console.log('Auto-refresh security data...');
+}, 30000);
+
+// Real-time updates simulation
+function simulateRealTimeUpdate() {
+    // This would be replaced with WebSocket or Server-Sent Events in production
+    const eventsList = document.getElementById('securityEventsList');
+    
+    // Add pulsing effect to new events
+    const newEvents = eventsList.querySelectorAll('.security-event:first-child');
+    newEvents.forEach(event => {
+        event.classList.add('animate-pulse');
+        setTimeout(() => {
+            event.classList.remove('animate-pulse');
+        }, 2000);
+    });
+}
+
+// Initialize tooltips for event types
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects for better UX
+    const eventItems = document.querySelectorAll('.security-event');
+    eventItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(4px)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+});
+</script>
+{% endblock %}
