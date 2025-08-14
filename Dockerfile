@@ -1,4 +1,4 @@
-
+# Use stable Python version with good scientific package support
 FROM python:3.11-slim
 
 # Set environment variables
@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED=1
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies (including ffmpeg)
+# Install system dependencies (including ffmpeg for audio processing)
 RUN apt-get update && apt-get install -y \
     build-essential \
     libsndfile1 \
@@ -17,7 +17,10 @@ RUN apt-get update && apt-get install -y \
 
 # Copy requirements
 COPY requirements-production.txt requirements.txt
-RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Upgrade pip and install dependencies with prebuilt wheels where possible
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
 COPY . .
