@@ -15,6 +15,7 @@ Flask-WTF
 WTForms
 Flask-Bcrypt
 psycopg2
+email_validator
 cloudinary
 greenlet==3.2.3
 gunicorn==23.0.0
