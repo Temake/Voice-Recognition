@@ -10,6 +10,7 @@ WORKDIR /app
 
 # Install system dependencies (including ffmpeg for audio processing)
 RUN apt-get update && apt-get install -y \
+    libpq-dev python3-dev \
     build-essential \
     libsndfile1 \
     ffmpeg \
