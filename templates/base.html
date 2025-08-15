@@ -45,17 +45,16 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
-                    <a href="{{ url_for('config.index') }}" class="flex items-center text-white text-xl font-bold hover:text-blue-200 transition-colors">
+                    <a href="{{ url_for('config.index') if current_user.is_authenticated else url_for('config.welcome') }}" class="flex items-center text-white text-xl font-bold hover:text-blue-200 transition-colors">
                         <i class="fas fa-microphone mr-2"></i>Voice Attendance System
                     </a>
                 </div>
+                
+                {% if current_user.is_authenticated %}
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
                         <a href="{{ url_for('config.index') }}" class="text-white hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
                             <i class="fas fa-home mr-1"></i>Dashboard
-                        </a>
-                        <a href="{{ url_for('config.enroll_page') }}" class="text-white hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                            <i class="fas fa-user-plus mr-1"></i>Enroll Student
                         </a>
                         <a href="{{ url_for('config.attendance_page') }}" class="text-white hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
                             <i class="fas fa-check-circle mr-1"></i>Mark Attendance
@@ -66,11 +65,36 @@
                         <a href="{{ url_for('config.security_page') }}" class="text-white hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
                             <i class="fas fa-shield-alt mr-1"></i>Security
                         </a>
+                        <button id="shareBtn" class="text-white hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-share mr-1"></i>Share Link
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <span class="text-white text-sm">Welcome, {{ current_user.first_name }}!</span>
+                    <a href="{{ url_for('auth.logout') }}" class="text-white hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                    </a>
+                </div>
+                {% else %}
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
                         <a href="{{ url_for('config.welcome') }}" class="text-white hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                            <i class="fas fa-home mr-1"></i>Welcome
+                            <i class="fas fa-home mr-1"></i>Home
                         </a>
                     </div>
                 </div>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('auth.login') }}" class="text-white hover:bg-blue-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Teacher Login
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" class="bg-green-600 text-white hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        <i class="fas fa-user-plus mr-1"></i>Register
+                    </a>
+                </div>
+                {% endif %}
                 <!-- Mobile menu button -->
                 <div class="md:hidden">
                     <button type="button" class="bg-blue-600 inline-flex items-center justify-center p-2 rounded-md text-blue-200 hover:text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-600 focus:ring-white" onclick="toggleMobileMenu()">
@@ -131,6 +155,41 @@
             const menu = document.getElementById('mobileMenu');
             menu.classList.toggle('hidden');
         }
+
+        // Share link functionality
+        {% if current_user.is_authenticated %}
+        document.addEventListener('DOMContentLoaded', function() {
+            const shareBtn = document.getElementById('shareBtn');
+            if (shareBtn) {
+                shareBtn.addEventListener('click', async function() {
+                    try {
+                        const response = await fetch('{{ url_for("config.share_link") }}');
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            // Copy to clipboard
+                            await navigator.clipboard.writeText(data.enrollment_link);
+                            
+                            // Show success message
+                            shareBtn.innerHTML = '<i class="fas fa-check mr-1"></i>Copied!';
+                            shareBtn.classList.add('bg-green-700');
+                            
+                            setTimeout(() => {
+                                shareBtn.innerHTML = '<i class="fas fa-share mr-1"></i>Share Link';
+                                shareBtn.classList.remove('bg-green-700');
+                            }, 2000);
+                            
+                            // Optional: Show alert with link
+                            alert('Enrollment link copied to clipboard!\\n\\nShare this link with your students:\\n' + data.enrollment_link);
+                        }
+                    } catch (error) {
+                        console.error('Error sharing link:', error);
+                        alert('Failed to generate share link. Please try again.');
+                    }
+                });
+            }
+        });
+        {% endif %}
     </script>
     {% block scripts %}{% endblock %}
 </body>

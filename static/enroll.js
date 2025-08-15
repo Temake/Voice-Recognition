@@ -12,7 +12,8 @@ const audioConfig = { audio: { channelCount: 1, sampleRate: 22050, sampleSize: 1
 document.addEventListener('DOMContentLoaded', function() {
     if (!navigator.mediaDevices?.getUserMedia) {
         recordBtn.disabled = true;
-        recordBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Not supported';
+        recordBtn.className = 'bg-gray-400 text-white px-6 py-2 rounded-md font-medium cursor-not-allowed mb-4';
+        recordBtn.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>Not supported';
     }
 });
 
@@ -41,18 +42,18 @@ async function startRecording() {
             voiceFileInput.required = false;
             stream.getTracks().forEach(track => track.stop());
             clearInterval(recordingTimer);
-            document.getElementById('recordingTime').style.display = 'none';
+            document.getElementById('recordingTime').classList.add('hidden');
             
-            recordBtn.className = 'btn btn-success mb-3';
-            recordBtn.innerHTML = '<i class="fas fa-check me-2"></i>Voice Recorded';
+            recordBtn.className = 'bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md font-medium transition-colors mb-4';
+            recordBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Voice Recorded';
         };
         
         mediaRecorder.start();
         startTime = Date.now();
         
-        recordBtn.className = 'btn btn-danger mb-3';
-        recordBtn.innerHTML = '<i class="fas fa-stop me-2"></i>Stop Recording';
-        document.getElementById('recordingTime').style.display = 'block';
+        recordBtn.className = 'bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md font-medium transition-colors mb-4';
+        recordBtn.innerHTML = '<i class="fas fa-stop mr-2"></i>Stop Recording';
+        document.getElementById('recordingTime').classList.remove('hidden');
         
         recordingTimer = setInterval(() => {
             const elapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -77,13 +78,13 @@ function showAudioPlayback() {
     
     const audioDiv = document.createElement('div');
     audioDiv.id = 'audioPlayback';
-    audioDiv.className = 'mt-3';
+    audioDiv.className = 'mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200';
     audioDiv.innerHTML = `
-        <label class="form-label">Recorded Audio</label>
-        <audio controls style="width: 100%;"></audio>
-        <div class="mt-2">
-            <button type="button" class="btn btn-sm btn-outline-primary" onclick="reRecord()">
-                <i class="fas fa-redo me-1"></i>Re-record
+        <label class="block text-sm font-medium text-gray-700 mb-2">Recorded Audio</label>
+        <audio controls class="w-full mb-3 rounded-md"></audio>
+        <div class="flex justify-center">
+            <button type="button" class="px-4 py-2 border border-blue-300 text-blue-700 rounded-md hover:bg-blue-50 transition-colors" onclick="reRecord()">
+                <i class="fas fa-redo mr-2"></i>Re-record
             </button>
         </div>
     `;
@@ -99,8 +100,8 @@ function reRecord() {
     const audioPlayback = document.getElementById('audioPlayback');
     if (audioPlayback) audioPlayback.remove();
     
-    recordBtn.className = 'btn btn-record text-white mb-3';
-    recordBtn.innerHTML = '<i class="fas fa-microphone me-2"></i>Start Recording';
+    recordBtn.className = 'btn-record text-white px-6 py-2 rounded-md font-medium transition-colors mb-4';
+    recordBtn.innerHTML = '<i class="fas fa-microphone mr-2"></i>Start Recording';
 }
 
 // Convert to WAV
@@ -168,6 +169,66 @@ function audioBufferToWav(audioBuffer) {
     
     return new Blob([buffer], { type: 'audio/wav' });
 }
+function showAlert(message, type) {
+    // Remove existing alerts
+    const existingAlerts = document.querySelectorAll('.custom-alert');
+    existingAlerts.forEach(alert => alert.remove());
+    
+    // Determine colors based on type
+    const alertColors = {
+        'success': 'bg-green-50 border-green-200 text-green-800',
+        'error': 'bg-red-50 border-red-200 text-red-800',
+        'warning': 'bg-yellow-50 border-yellow-200 text-yellow-800',
+        'info': 'bg-blue-50 border-blue-200 text-blue-800'
+    };
+    
+    const iconMap = {
+        'success': 'fa-check-circle text-green-600',
+        'error': 'fa-exclamation-circle text-red-600',
+        'warning': 'fa-exclamation-triangle text-yellow-600',
+        'info': 'fa-info-circle text-blue-600'
+    };
+    
+    // Create new alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `custom-alert mb-4 p-4 rounded-md border ${alertColors[type] || alertColors['info']} relative transition-all duration-300 ease-in-out`;
+    alertDiv.innerHTML = `
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas ${iconMap[type] || iconMap['info']} mr-2"></i>
+                <span>${message}</span>
+            </div>
+            <button type="button" class="text-gray-400 hover:text-gray-600 focus:outline-none" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    // Insert alert at the top of the card body or form container
+    const container = document.querySelector('.p-6') || document.querySelector('.card-body');
+    if (container) {
+        container.insertBefore(alertDiv, container.firstChild);
+    }
+    
+    // Add entrance animation
+    alertDiv.style.opacity = '0';
+    alertDiv.style.transform = 'translateY(-10px)';
+    setTimeout(() => {
+        alertDiv.style.opacity = '1';
+        alertDiv.style.transform = 'translateY(0)';
+    }, 10);
+    
+    // Auto-hide success alerts
+    if (type === 'success') {
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.style.opacity = '0';
+                alertDiv.style.transform = 'translateY(-10px)';
+                setTimeout(() => alertDiv.remove(), 300);
+            }
+        }, 3000);
+    }
+}
 
 // Handle form submission
 enrollForm.addEventListener('submit', function(e) {
@@ -179,12 +240,12 @@ enrollForm.addEventListener('submit', function(e) {
     console.log('Form submission - Student ID:', studentId, 'Student Name:', studentName);
     
     if (!studentId || !studentName) {
-        alert('Please fill in all required fields');
+        showAlert('Please fill in all required fields', 'error');
         return;
     }
     
     if (!audioBlob && !voiceFileInput.files.length) {
-        alert('Please record your voice or upload an audio file');
+        showAlert('Please record your voice or upload an audio file', 'error');
         return;
     }
     
@@ -196,6 +257,15 @@ enrollForm.addEventListener('submit', function(e) {
     // Explicitly add form fields
     formData.append('student_id', studentId);
     formData.append('student_name', studentName);
+    
+    // Add teacher_id from hidden field
+    const teacherIdField = document.querySelector('input[name="teacher_id"]');
+    if (teacherIdField) {
+        formData.append('teacher_id', teacherIdField.value);
+        console.log('Added teacher_id to form:', teacherIdField.value);
+    } else {
+        console.error('Teacher ID field not found!');
+    }
     
     // Add recorded audio or uploaded file
     if (audioBlob) {
@@ -220,7 +290,7 @@ enrollForm.addEventListener('submit', function(e) {
     .then(data => {
         hideLoading();
         if (data.success) {
-            alert(data.message || 'Student enrolled successfully!');
+            showAlert(data.message || 'Student enrolled successfully!', 'success');
             // Reset form after successful enrollment
             enrollForm.reset();
             audioBlob = null;
@@ -231,16 +301,16 @@ enrollForm.addEventListener('submit', function(e) {
             if (audioPlayback) audioPlayback.remove();
             
             // Reset record button
-            recordBtn.className = 'btn btn-record text-white mb-3';
-            recordBtn.innerHTML = '<i class="fas fa-microphone me-2"></i>Start Recording';
+            recordBtn.className = 'btn-record text-white px-6 py-2 rounded-md font-medium transition-colors mb-4';
+            recordBtn.innerHTML = '<i class="fas fa-microphone mr-2"></i>Start Recording';
         } else {
-            alert(data.message || 'Enrollment failed');
+            showAlert(data.message || 'Enrollment failed');
         }
     })
     .catch(error => {
         hideLoading();
         console.error('Error:', error);
-        alert('Network error. Please try again.');
+        showAlert('Network error. Please try again.', 'error');
     });
 });
 
@@ -248,18 +318,31 @@ function showLoading() {
     const overlay = document.createElement('div');
     overlay.id = 'loadingOverlay';
     overlay.innerHTML = `
-        <div style="text-align: center; color: white;">
-            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
-            <h5 class="mt-3">Enrolling Student...</h5>
-            <p>Processing voice sample...</p>
+        <div class="text-center text-white">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
+            <h5 class="text-xl font-semibold mb-2">Enrolling Student...</h5>
+            <p class="text-blue-200">Processing voice sample...</p>
+            <div class="mt-4">
+                <div class="bg-gray-200 rounded-full h-2 w-64 mx-auto">
+                    <div class="bg-blue-500 h-2 rounded-full animate-pulse" style="width: 60%"></div>
+                </div>
+                <p class="text-sm text-gray-300 mt-2">Please wait while we process your enrollment...</p>
+            </div>
         </div>
     `;
-    overlay.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.7); display: flex; justify-content: center;
-        align-items: center; z-index: 9999;
+    overlay.className = `
+        fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 
+        backdrop-blur-sm transition-all duration-300 ease-in-out
     `;
+    
+    // Add entrance animation
+    overlay.style.opacity = '0';
     document.body.appendChild(overlay);
+    
+    // Trigger entrance animation
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+    }, 10);
     
     // Disable form
     enrollForm.querySelectorAll('input, button').forEach(el => el.disabled = true);
@@ -268,7 +351,13 @@ function showLoading() {
 function hideLoading() {
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) {
-        overlay.remove();
+        // Add exit animation
+        overlay.style.opacity = '0';
+        overlay.style.transform = 'scale(0.95)';
+        
+        setTimeout(() => {
+            overlay.remove();
+        }, 300);
     }
     
     // Re-enable form
@@ -281,15 +370,26 @@ voiceFileInput.addEventListener('change', function() {
         audioBlob = null;
         const audioPlayback = document.getElementById('audioPlayback');
         if (audioPlayback) audioPlayback.remove();
-        recordBtn.className = 'btn btn-record text-white mb-3';
-        recordBtn.innerHTML = '<i class="fas fa-microphone me-2"></i>Start Recording';
+        recordBtn.className = 'btn-record text-white px-6 py-2 rounded-md font-medium transition-colors mb-4';
+        recordBtn.innerHTML = '<i class="fas fa-microphone mr-2"></i>Start Recording';
     }
 });
 
-// Add CSS
+// Add CSS for the custom button
 const style = document.createElement('style');
 style.textContent = `
-    .btn-record { background-color: #007bff; border-color: #007bff; }
-    .btn-record:hover { background-color: #0056b3; border-color: #0056b3; }
+    .btn-record { 
+        background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-record:hover { 
+        background: linear-gradient(45deg, #1d4ed8, #1e40af);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    .btn-record:active {
+        transform: translateY(0);
+    }
 `;
 document.head.appendChild(style);

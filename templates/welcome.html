@@ -20,35 +20,114 @@
             100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
         
-        @keyframes slideInFromBottom {
-            from { transform: translateY(100px); opacity: 0; }
+        @keyframes slideInUp {
+            from { transform: translateY(60px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
         
-        @keyframes slideInFromLeft {
-            from { transform: translateX(-100px); opacity: 0; }
+        @keyframes slideInLeft {
+            from { transform: translateX(-60px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
         
-        @keyframes slideInFromRight {
-            from { transform: translateX(100px); opacity: 0; }
+        @keyframes slideInRight {
+            from { transform: translateX(60px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         .float-animation { animation: float 6s ease-in-out infinite; }
         .pulse-border { animation: pulse-border 2s infinite; }
-        .slide-in-bottom { animation: slideInFromBottom 0.8s ease-out; }
-        .slide-in-left { animation: slideInFromLeft 0.8s ease-out; }
-        .slide-in-right { animation: slideInFromRight 0.8s ease-out; }
+        
+        .animate-on-scroll {
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .animate-on-scroll.animated {
+            opacity: 1;
+        }
+        
+        .slide-up { transform: translateY(60px); }
+        .slide-up.animated { transform: translateY(0); }
+        
+        .slide-left { transform: translateX(-60px); }
+        .slide-left.animated { transform: translateX(0); }
+        
+        .slide-right { transform: translateX(60px); }
+        .slide-right.animated { transform: translateX(0); }
         
         .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
         .wave-bg {
-            background-image: url("data:image/svg+xml,%3Csvg width='1920' height='1080' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient x1='50%25' y1='0%25' x2='50%25' y2='100%25' id='a'%3E%3Cstop stop-color='%23667eea' offset='0%25'/%3E%3Cstop stop-color='%23764ba2' offset='100%25'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23a)' d='M0,0 L1920,0 L1920,1080 L0,1080 Z'/%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0,864 C240,780 480,696 720,696 C960,696 1200,780 1440,864 L1440,1080 L0,1080 Z'/%3E%3C/svg%3E");
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+        }
+        
+        .wave-bg::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' fill='%23f9fafb'%3E%3C/path%3E%3C/svg%3E") no-repeat;
             background-size: cover;
-            background-position: center;
+            z-index: 1;
+        }
+        
+        /* Responsive text scaling */
+        @media (max-width: 640px) {
+            .hero-title { font-size: 2.5rem; line-height: 1.1; }
+            .hero-subtitle { font-size: 1.125rem; }
+        }
+        
+        @media (min-width: 641px) and (max-width: 768px) {
+            .hero-title { font-size: 3.5rem; line-height: 1.1; }
+            .hero-subtitle { font-size: 1.25rem; }
+        }
+        
+        @media (min-width: 769px) {
+            .hero-title { font-size: 4.5rem; line-height: 1.1; }
+            .hero-subtitle { font-size: 1.5rem; }
+        }
+        
+        @media (min-width: 1024px) {
+            .hero-title { font-size: 5rem; line-height: 1.1; }
+            .hero-subtitle { font-size: 1.5rem; }
+        }
+        
+        /* Improved button responsiveness */
+        .btn-primary, .btn-secondary {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .btn-primary:hover, .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Card hover effects */
+        .feature-card {
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Mobile menu improvements */
+        @media (max-width: 768px) {
+            .mobile-padding { padding: 1rem; }
+            .mobile-text-center { text-align: center; }
+            .mobile-mb { margin-bottom: 2rem; }
         }
     </style>
 </head>
@@ -57,34 +136,34 @@
     <section class="min-h-screen wave-bg flex items-center justify-center relative">
         <!-- Background Particles -->
         <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute top-1/4 left-1/4 w-4 h-4 bg-white bg-opacity-20 rounded-full float-animation"></div>
-            <div class="absolute top-1/3 right-1/4 w-3 h-3 bg-white bg-opacity-30 rounded-full float-animation" style="animation-delay: 2s;"></div>
-            <div class="absolute bottom-1/3 left-1/3 w-5 h-5 bg-white bg-opacity-15 rounded-full float-animation" style="animation-delay: 4s;"></div>
-            <div class="absolute top-1/2 right-1/3 w-2 h-2 bg-white bg-opacity-25 rounded-full float-animation" style="animation-delay: 1s;"></div>
+            <div class="absolute top-1/4 left-1/4 w-2 h-2 sm:w-4 sm:h-4 bg-white bg-opacity-20 rounded-full float-animation"></div>
+            <div class="absolute top-1/3 right-1/4 w-1.5 h-1.5 sm:w-3 sm:h-3 bg-white bg-opacity-30 rounded-full float-animation" style="animation-delay: 2s;"></div>
+            <div class="absolute bottom-1/3 left-1/3 w-3 h-3 sm:w-5 sm:h-5 bg-white bg-opacity-15 rounded-full float-animation" style="animation-delay: 4s;"></div>
+            <div class="absolute top-1/2 right-1/3 w-1 h-1 sm:w-2 sm:h-2 bg-white bg-opacity-25 rounded-full float-animation" style="animation-delay: 1s;"></div>
         </div>
         
-        <div class="container mx-auto px-6 text-center text-white relative z-10">
-            <div class="slide-in-bottom">
-                <div class="mb-8">
-                    <div class="inline-block p-6 bg-white bg-opacity-10 rounded-full mb-6 pulse-border">
-                        <i class="fas fa-microphone text-6xl text-white"></i>
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-white relative z-10">
+            <div class="animate-on-scroll slide-up">
+                <div class="mb-6 sm:mb-8">
+                    <div class="inline-block p-4 sm:p-6 bg-white bg-opacity-10 rounded-full mb-4 sm:mb-6 pulse-border">
+                        <i class="fas fa-microphone text-4xl sm:text-5xl lg:text-6xl text-white"></i>
                     </div>
                 </div>
                 
-                <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                <h1 class="hero-title font-bold mb-4 sm:mb-6 leading-tight px-2">
                     Voice Attendance System
                 </h1>
                 
-                <p class="text-xl md:text-2xl mb-8 text-white text-opacity-90 max-w-3xl mx-auto">
+                <p class="hero-subtitle mb-6 sm:mb-8 text-white text-opacity-90 max-w-4xl mx-auto px-4">
                     Revolutionize attendance tracking with cutting-edge voice recognition technology. 
                     Secure, accurate, and effortless attendance management.
                 </p>
                 
-                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                    <a href="{{ url_for('config.index') }}" class="px-8 py-4 bg-white text-purple-700 rounded-full font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 shadow-lg">
+                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4">
+                    <a href="{{url_for('dashboard')}}" class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white text-purple-700 rounded-full font-semibold text-base sm:text-lg btn-primary shadow-lg">
                         <i class="fas fa-rocket mr-2"></i>Get Started
                     </a>
-                    <button onclick="scrollToFeatures()" class="px-8 py-4 border-2 border-white text-white rounded-full font-semibold text-lg hover:bg-white hover:text-purple-700 transform hover:scale-105 transition-all duration-300">
+                    <button onclick="scrollToFeatures()" class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 border-2 border-white text-white rounded-full font-semibold text-base sm:text-lg btn-secondary">
                         <i class="fas fa-play mr-2"></i>Learn More
                     </button>
                 </div>
@@ -92,97 +171,97 @@
         </div>
         
         <!-- Scroll Indicator -->
-        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-            <i class="fas fa-chevron-down text-white text-2xl opacity-70"></i>
+        <div class="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <i class="fas fa-chevron-down text-white text-xl sm:text-2xl opacity-70"></i>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-20 bg-gray-50">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold text-gray-900 mb-4 slide-in-bottom">Amazing Features</h2>
-                <p class="text-xl text-gray-600 max-w-2xl mx-auto slide-in-bottom">
+    <section id="features" class="py-12 sm:py-16 lg:py-20 bg-gray-50 relative z-10">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 sm:mb-16">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 animate-on-scroll slide-up">Amazing Features</h2>
+                <p class="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto animate-on-scroll slide-up px-4">
                     Discover the powerful capabilities that make our voice attendance system the perfect solution for modern attendance management.
                 </p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                 <!-- Feature 1 -->
-                <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 slide-in-left">
-                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-6">
-                        <i class="fas fa-microphone-alt text-white text-2xl"></i>
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6 sm:p-8 animate-on-scroll slide-left">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-4 sm:mb-6">
+                        <i class="fas fa-microphone-alt text-white text-xl sm:text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Voice Recognition</h3>
-                    <p class="text-gray-600 mb-4">Advanced AI-powered voice recognition technology ensures accurate and secure student identification.</p>
-                    <div class="flex items-center text-blue-600">
-                        <span class="font-medium">Learn more</span>
-                        <i class="fas fa-arrow-right ml-2"></i>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Voice Recognition</h3>
+                    <p class="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">Advanced AI-powered voice recognition technology ensures accurate and secure student identification.</p>
+                    <div class="flex items-center text-blue-600 cursor-pointer group">
+                        <span class="font-medium text-sm sm:text-base">Learn more</span>
+                        <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>
                 
                 <!-- Feature 2 -->
-                <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 slide-in-bottom" style="animation-delay: 0.2s;">
-                    <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-lg flex items-center justify-center mb-6">
-                        <i class="fas fa-shield-alt text-white text-2xl"></i>
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6 sm:p-8 animate-on-scroll slide-up" style="animation-delay: 0.1s;">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-lg flex items-center justify-center mb-4 sm:mb-6">
+                        <i class="fas fa-shield-alt text-white text-xl sm:text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Secure & Private</h3>
-                    <p class="text-gray-600 mb-4">Bank-level security with encrypted voice data and comprehensive audit trails for complete peace of mind.</p>
-                    <div class="flex items-center text-green-600">
-                        <span class="font-medium">Learn more</span>
-                        <i class="fas fa-arrow-right ml-2"></i>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Secure & Private</h3>
+                    <p class="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">Bank-level security with encrypted voice data and comprehensive audit trails for complete peace of mind.</p>
+                    <div class="flex items-center text-green-600 cursor-pointer group">
+                        <span class="font-medium text-sm sm:text-base">Learn more</span>
+                        <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>
                 
                 <!-- Feature 3 -->
-                <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 slide-in-right" style="animation-delay: 0.4s;">
-                    <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center mb-6">
-                        <i class="fas fa-chart-line text-white text-2xl"></i>
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6 sm:p-8 animate-on-scroll slide-right" style="animation-delay: 0.2s;">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center mb-4 sm:mb-6">
+                        <i class="fas fa-chart-line text-white text-xl sm:text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Real-time Analytics</h3>
-                    <p class="text-gray-600 mb-4">Comprehensive reporting and analytics with real-time dashboards and detailed attendance insights.</p>
-                    <div class="flex items-center text-purple-600">
-                        <span class="font-medium">Learn more</span>
-                        <i class="fas fa-arrow-right ml-2"></i>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Real-time Analytics</h3>
+                    <p class="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">Comprehensive reporting and analytics with real-time dashboards and detailed attendance insights.</p>
+                    <div class="flex items-center text-purple-600 cursor-pointer group">
+                        <span class="font-medium text-sm sm:text-base">Learn more</span>
+                        <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>
                 
                 <!-- Feature 4 -->
-                <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 slide-in-left" style="animation-delay: 0.6s;">
-                    <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center mb-6">
-                        <i class="fas fa-mobile-alt text-white text-2xl"></i>
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6 sm:p-8 animate-on-scroll slide-left" style="animation-delay: 0.3s;">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center mb-4 sm:mb-6">
+                        <i class="fas fa-mobile-alt text-white text-xl sm:text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Mobile Friendly</h3>
-                    <p class="text-gray-600 mb-4">Responsive design works perfectly on all devices - desktop, tablet, and mobile phones.</p>
-                    <div class="flex items-center text-orange-600">
-                        <span class="font-medium">Learn more</span>
-                        <i class="fas fa-arrow-right ml-2"></i>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Mobile Friendly</h3>
+                    <p class="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">Responsive design works perfectly on all devices - desktop, tablet, and mobile phones.</p>
+                    <div class="flex items-center text-orange-600 cursor-pointer group">
+                        <span class="font-medium text-sm sm:text-base">Learn more</span>
+                        <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>
                 
                 <!-- Feature 5 -->
-                <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 slide-in-bottom" style="animation-delay: 0.8s;">
-                    <div class="w-16 h-16 bg-gradient-to-r from-red-500 to-pink-600 rounded-lg flex items-center justify-center mb-6">
-                        <i class="fas fa-clock text-white text-2xl"></i>
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6 sm:p-8 animate-on-scroll slide-up" style="animation-delay: 0.4s;">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-red-500 to-pink-600 rounded-lg flex items-center justify-center mb-4 sm:mb-6">
+                        <i class="fas fa-clock text-white text-xl sm:text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Lightning Fast</h3>
-                    <p class="text-gray-600 mb-4">Process attendance in seconds with our optimized voice recognition algorithms and smart caching.</p>
-                    <div class="flex items-center text-red-600">
-                        <span class="font-medium">Learn more</span>
-                        <i class="fas fa-arrow-right ml-2"></i>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Lightning Fast</h3>
+                    <p class="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">Process attendance in seconds with our optimized voice recognition algorithms and smart caching.</p>
+                    <div class="flex items-center text-red-600 cursor-pointer group">
+                        <span class="font-medium text-sm sm:text-base">Learn more</span>
+                        <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>
                 
                 <!-- Feature 6 -->
-                <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 slide-in-right" style="animation-delay: 1s;">
-                    <div class="w-16 h-16 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-lg flex items-center justify-center mb-6">
-                        <i class="fas fa-users text-white text-2xl"></i>
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6 sm:p-8 animate-on-scroll slide-right" style="animation-delay: 0.5s;">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-lg flex items-center justify-center mb-4 sm:mb-6">
+                        <i class="fas fa-users text-white text-xl sm:text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Easy Management</h3>
-                    <p class="text-gray-600 mb-4">Intuitive interface for easy student enrollment, attendance tracking, and comprehensive reporting.</p>
-                    <div class="flex items-center text-indigo-600">
-                        <span class="font-medium">Learn more</span>
-                        <i class="fas fa-arrow-right ml-2"></i>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Easy Management</h3>
+                    <p class="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">Intuitive interface for easy student enrollment, attendance tracking, and comprehensive reporting.</p>
+                    <div class="flex items-center text-indigo-600 cursor-pointer group">
+                        <span class="font-medium text-sm sm:text-base">Learn more</span>
+                        <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </div>
             </div>
@@ -190,53 +269,53 @@
     </section>
 
     <!-- How It Works Section -->
-    <section class="py-20 bg-white">
-        <div class="container mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
-                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+    <section class="py-12 sm:py-16 lg:py-20 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 sm:mb-16">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 animate-on-scroll slide-up">How It Works</h2>
+                <p class="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto animate-on-scroll slide-up px-4">
                     Simple, secure, and efficient - get started in just three easy steps
                 </p>
             </div>
             
-            <div class="max-w-4xl mx-auto">
+            <div class="max-w-6xl mx-auto">
                 <!-- Step 1 -->
-                <div class="flex flex-col md:flex-row items-center mb-16 slide-in-left">
-                    <div class="md:w-1/2 mb-8 md:mb-0 md:pr-8">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">1</div>
-                            <h3 class="text-2xl font-bold text-gray-900">Enroll Students</h3>
+                <div class="flex flex-col lg:flex-row items-center mb-12 sm:mb-16 animate-on-scroll slide-left">
+                    <div class="lg:w-1/2 mb-6 sm:mb-8 lg:mb-0 lg:pr-8 mobile-text-center">
+                        <div class="flex items-center justify-center lg:justify-start mb-4">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-xl mr-4">1</div>
+                            <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Enroll Students</h3>
                         </div>
-                        <p class="text-gray-600 text-lg">
+                        <p class="text-gray-600 text-base sm:text-lg px-2 lg:px-0">
                             Register students by recording their voice samples. Our AI creates unique voice profiles for each student, ensuring accurate identification every time.
                         </p>
                     </div>
-                    <div class="md:w-1/2">
-                        <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 text-center">
-                            <i class="fas fa-user-plus text-5xl text-blue-600 mb-4 float-animation"></i>
+                    <div class="lg:w-1/2 w-full max-w-md lg:max-w-none">
+                        <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 sm:p-8 text-center">
+                            <i class="fas fa-user-plus text-4xl sm:text-5xl text-blue-600 mb-4 float-animation"></i>
                             <div class="flex justify-center space-x-2">
-                                <div class="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
-                                <div class="w-3 h-3 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
-                                <div class="w-3 h-3 bg-blue-600 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+                                <div class="w-2 h-2 sm:w-3 sm:h-3 bg-blue-400 rounded-full animate-pulse"></div>
+                                <div class="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                                <div class="w-2 h-2 sm:w-3 sm:h-3 bg-blue-600 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Step 2 -->
-                <div class="flex flex-col md:flex-row-reverse items-center mb-16 slide-in-right">
-                    <div class="md:w-1/2 mb-8 md:mb-0 md:pl-8">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">2</div>
-                            <h3 class="text-2xl font-bold text-gray-900">Voice Authentication</h3>
+                <div class="flex flex-col lg:flex-row-reverse items-center mb-12 sm:mb-16 animate-on-scroll slide-right">
+                    <div class="lg:w-1/2 mb-6 sm:mb-8 lg:mb-0 lg:pl-8 mobile-text-center">
+                        <div class="flex items-center justify-center lg:justify-start mb-4">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-xl mr-4">2</div>
+                            <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Voice Authentication</h3>
                         </div>
-                        <p class="text-gray-600 text-lg">
+                        <p class="text-gray-600 text-base sm:text-lg px-2 lg:px-0">
                             Students simply speak into their device to mark attendance. Our advanced algorithms instantly verify their identity against their voice profile.
                         </p>
                     </div>
-                    <div class="md:w-1/2">
-                        <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-8 text-center">
-                            <i class="fas fa-microphone text-5xl text-green-600 mb-4 pulse-border"></i>
+                    <div class="lg:w-1/2 w-full max-w-md lg:max-w-none">
+                        <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-6 sm:p-8 text-center">
+                            <i class="fas fa-microphone text-4xl sm:text-5xl text-green-600 mb-4 pulse-border"></i>
                             <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
                                 <div class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full animate-pulse" style="width: 75%"></div>
                             </div>
@@ -245,27 +324,29 @@
                 </div>
                 
                 <!-- Step 3 -->
-                <div class="flex flex-col md:flex-row items-center slide-in-left">
-                    <div class="md:w-1/2 mb-8 md:mb-0 md:pr-8">
-                        <div class="flex items-center mb-4">
-                            <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">3</div>
-                            <h3 class="text-2xl font-bold text-gray-900">Track & Report</h3>
+                <div class="flex flex-col lg:flex-row items-center animate-on-scroll slide-left">
+                    <div class="lg:w-1/2 mb-6 sm:mb-8 lg:mb-0 lg:pr-8 mobile-text-center">
+                        <div class="flex items-center justify-center lg:justify-start mb-4">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-xl mr-4">3</div>
+                            <h3 class="text-xl sm:text-2xl font-bold text-gray-900">Track & Report</h3>
                         </div>
-                        <p class="text-gray-600 text-lg">
+                        <p class="text-gray-600 text-base sm:text-lg px-2 lg:px-0">
                             View real-time attendance data, generate detailed reports, and monitor security events through our comprehensive dashboard.
                         </p>
                     </div>
-                    <div class="md:w-1/2">
-                        <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-8">
+                    <div class="lg:w-1/2 w-full max-w-md lg:max-w-none">
+                        <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 sm:p-8">
                             <div class="grid grid-cols-3 gap-2 mb-4">
-                                <div class="h-8 bg-purple-200 rounded animate-pulse"></div>
-                                <div class="h-8 bg-purple-300 rounded animate-pulse" style="animation-delay: 0.2s;"></div>
-                                <div class="h-8 bg-purple-400 rounded animate-pulse" style="animation-delay: 0.4s;"></div>
-                                <div class="h-8 bg-pink-200 rounded animate-pulse" style="animation-delay: 0.6s;"></div>
-                                <div class="h-8 bg-pink-300 rounded animate-pulse" style="animation-delay: 0.8s;"></div>
-                                <div class="h-8 bg-pink-400 rounded animate-pulse" style="animation-delay: 1s;"></div>
+                                <div class="h-6 sm:h-8 bg-purple-200 rounded animate-pulse"></div>
+                                <div class="h-6 sm:h-8 bg-purple-300 rounded animate-pulse" style="animation-delay: 0.2s;"></div>
+                                <div class="h-6 sm:h-8 bg-purple-400 rounded animate-pulse" style="animation-delay: 0.4s;"></div>
+                                <div class="h-6 sm:h-8 bg-pink-200 rounded animate-pulse" style="animation-delay: 0.6s;"></div>
+                                <div class="h-6 sm:h-8 bg-pink-300 rounded animate-pulse" style="animation-delay: 0.8s;"></div>
+                                <div class="h-6 sm:h-8 bg-pink-400 rounded animate-pulse" style="animation-delay: 1s;"></div>
                             </div>
-                            <i class="fas fa-chart-bar text-3xl text-purple-600 float-animation"></i>
+                            <div class="text-center">
+                                <i class="fas fa-chart-bar text-2xl sm:text-3xl text-purple-600 float-animation"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -274,20 +355,20 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="py-20 gradient-bg relative overflow-hidden">
+    <section class="py-12 sm:py-16 lg:py-20 gradient-bg relative overflow-hidden">
         <div class="absolute inset-0">
             <div class="absolute top-0 left-0 w-full h-full bg-black bg-opacity-10"></div>
         </div>
-        <div class="container mx-auto px-6 text-center text-white relative z-10">
-            <h2 class="text-4xl font-bold mb-6 slide-in-bottom">Ready to Get Started?</h2>
-            <p class="text-xl mb-8 text-white text-opacity-90 max-w-2xl mx-auto slide-in-bottom">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-white relative z-10">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 animate-on-scroll slide-up">Ready to Get Started?</h2>
+            <p class="text-lg sm:text-xl mb-6 sm:mb-8 text-white text-opacity-90 max-w-3xl mx-auto animate-on-scroll slide-up px-4">
                 Join the future of attendance management. Experience the power of voice recognition technology today.
             </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center slide-in-bottom">
-                <a href="{{ url_for('config.index') }}" class="px-8 py-4 bg-white text-purple-700 rounded-full font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 shadow-lg">
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center animate-on-scroll slide-up px-4">
+                <a href="#dashboard" class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white text-purple-700 rounded-full font-semibold text-base sm:text-lg btn-primary shadow-lg">
                     <i class="fas fa-rocket mr-2"></i>Launch Dashboard
                 </a>
-                <a href="{{ url_for('config.enroll_page') }}" class="px-8 py-4 border-2 border-white text-white rounded-full font-semibold text-lg hover:bg-white hover:text-purple-700 transform hover:scale-105 transition-all duration-300">
+                <a href="#enroll" class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 border-2 border-white text-white rounded-full font-semibold text-base sm:text-lg btn-secondary">
                     <i class="fas fa-user-plus mr-2"></i>Enroll Students
                 </a>
             </div>
@@ -295,70 +376,127 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-12">
-        <div class="container mx-auto px-6">
+    <footer class="bg-gray-900 text-white py-8 sm:py-12">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-6 md:mb-0">
-                    <h3 class="text-2xl font-bold flex items-center">
+                <div class="mb-6 md:mb-0 text-center md:text-left">
+                    <h3 class="text-xl sm:text-2xl font-bold flex items-center justify-center md:justify-start">
                         <i class="fas fa-microphone mr-2 text-blue-400"></i>
                         Voice Attendance System
                     </h3>
                     <p class="text-gray-400 mt-2">Secure. Smart. Simple.</p>
                 </div>
-                <div class="flex space-x-6">
-                    <a href="{{ url_for('config.index') }}" class="text-gray-400 hover:text-white transition-colors">Dashboard</a>
-                    <a href="{{ url_for('config.enroll_page') }}" class="text-gray-400 hover:text-white transition-colors">Enroll</a>
-                    <a href="{{ url_for('config.attendance_page') }}" class="text-gray-400 hover:text-white transition-colors">Attendance</a>
-                    <a href="{{ url_for('config.reports_page') }}" class="text-gray-400 hover:text-white transition-colors">Reports</a>
-                    <a href="{{ url_for('config.security_page') }}" class="text-gray-400 hover:text-white transition-colors">Security</a>
+                <div class="flex flex-wrap justify-center gap-4 sm:gap-6">
+                    <a href="#dashboard" class="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Dashboard</a>
+                    <a href="#enroll" class="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Enroll</a>
+                    <a href="#attendance" class="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Attendance</a>
+                    <a href="#reports" class="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Reports</a>
+                    <a href="#security" class="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Security</a>
                 </div>
             </div>
-            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
+            <div class="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-800 text-center text-gray-400 text-sm sm:text-base">
                 <p>&copy; 2025 Voice Attendance System. Built with ❤️ for modern education.</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Smooth scrolling
+        // Smooth scrolling function
         function scrollToFeatures() {
-            document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('features').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
         }
 
-        // Intersection Observer for animations
+        // Improved Intersection Observer for scroll animations
         const observerOptions = {
             threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
+            rootMargin: '0px 0px -100px 0px'
         };
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
+                    entry.target.classList.add('animated');
+                    // Unobserve after animation to improve performance
+                    observer.unobserve(entry.target);
                 }
             });
         }, observerOptions);
 
-        // Observe all animated elements
+        // Initialize animations on DOM load
         document.addEventListener('DOMContentLoaded', () => {
-            const animatedElements = document.querySelectorAll('.slide-in-bottom, .slide-in-left, .slide-in-right');
-            
+            // Observe all elements with animation classes
+            const animatedElements = document.querySelectorAll('.animate-on-scroll');
             animatedElements.forEach(el => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(50px)';
-                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
                 observer.observe(el);
+            });
+
+            // Add staggered delay to feature cards for better visual effect
+            const featureCards = document.querySelectorAll('.feature-card');
+            featureCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
             });
         });
 
-        // Parallax effect for hero section
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
+        // Throttled scroll handler for better performance
+        let isScrolling = false;
+        function handleScroll() {
+            if (!isScrolling) {
+                window.requestAnimationFrame(() => {
+                    const scrolled = window.pageYOffset;
+                    const hero = document.querySelector('.wave-bg');
+                    
+                    // Subtle parallax effect for hero section
+                    if (hero && scrolled < window.innerHeight) {
+                        hero.style.transform = `translateY(${scrolled * 0.3}px)`;
+                    }
+                    
+                    isScrolling = false;
+                });
+                isScrolling = true;
+            }
+        }
+
+        // Add scroll listener with passive option for better performance
+        window.addEventListener('scroll', handleScroll, { passive: true });
+
+        // Handle window resize for responsive adjustments
+        window.addEventListener('resize', () => {
+            // Reset any transforms on resize to prevent layout issues
             const hero = document.querySelector('.wave-bg');
             if (hero) {
-                hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+                hero.style.transform = '';
             }
+        });
+
+        // Improved button interactions
+        document.addEventListener('DOMContentLoaded', () => {
+            const buttons = document.querySelectorAll('.btn-primary, .btn-secondary');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', () => {
+                    button.style.transform = 'translateY(-2px)';
+                });
+                
+                button.addEventListener('mouseleave', () => {
+                    button.style.transform = '';
+                });
+            });
+        });
+
+        // Add loading state management
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+            
+            // Trigger initial animations for elements in viewport
+            const initialElements = document.querySelectorAll('.animate-on-scroll');
+            initialElements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight && rect.bottom > 0) {
+                    el.classList.add('animated');
+                }
+            });
         });
     </script>
 </body>

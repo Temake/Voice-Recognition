@@ -4,18 +4,15 @@ import time
 from .constants import *
 import json
 
-
-
-
-
 class SecurityManager:
     def __init__(self):
         self.failed_attempts = {}
         self.rate_limits = {}
+        # Keep file-based logging as backup while migrating
         self.security_log = self.load_security_log()
     
     def load_security_log(self):
-        """Load security log from file"""
+        """Load security log from file (backup)"""
         try:
             with open(SECURITY_LOG_FILE, 'r') as f:
                 return json.load(f)
@@ -23,22 +20,66 @@ class SecurityManager:
             return []
     
     def save_security_log(self):
-        """Save security log to file"""
-        with open(SECURITY_LOG_FILE, 'w') as f:
-            json.dump(self.security_log, f, indent=2)
+        """Save security log to file (backup)"""
+        try:
+            with open(SECURITY_LOG_FILE, 'w') as f:
+                json.dump(self.security_log, f, indent=2)
+        except Exception as e:
+            print(f"⚠️ Warning: Could not save security log to file: {e}")
     
-    def log_security_event(self, event_type, student_id, details, ip_address=None):
-        """Log security events"""
-        event = {
-            'timestamp': datetime.now().isoformat(),
-            'event_type': event_type,
-            'student_id': student_id,
-            'details': details,
-            'ip_address': ip_address
-        }
-        self.security_log.append(event)
-        self.save_security_log()
-        print(f"🔒 Security Event: {event_type} - {student_id} - {details}")
+    def log_security_event(self, event_type, student_id, details, ip_address=None, teacher_id=None):
+        """Log security events to both database and file"""
+        try:
+            # Import here to avoid circular imports
+            from .models import db, SecurityLog
+            from flask_login import current_user
+            
+            # Use provided teacher_id or current user (with safety checks)
+            if teacher_id is None and current_user and hasattr(current_user, 'is_authenticated') and current_user.is_authenticated:
+                teacher_id = current_user.id
+            
+            # Create database record if we have a teacher_id
+            if teacher_id:
+                event = SecurityLog(
+                    teacher_id=teacher_id,
+                    event_type=event_type,
+                    student_id=student_id,
+                    details=details,
+                    ip_address=ip_address
+                )
+                db.session.add(event)
+                db.session.commit()
+            
+            # Also keep file-based backup
+            file_event = {
+                'timestamp': datetime.now().isoformat(),
+                'event_type': event_type,
+                'student_id': student_id,
+                'details': details,
+                'ip_address': ip_address,
+                'teacher_id': teacher_id
+            }
+            self.security_log.append(file_event)
+            self.save_security_log()
+            
+            print(f"🔒 Security Event: {event_type} - {student_id} - {details}")
+            
+        except Exception as e:
+            print(f"⚠️ Error logging security event: {e}")
+            # Fall back to file logging only
+            try:
+                file_event = {
+                    'timestamp': datetime.now().isoformat(),
+                    'event_type': event_type,
+                    'student_id': student_id,
+                    'details': details,
+                    'ip_address': ip_address,
+                    'teacher_id': teacher_id
+                }
+                self.security_log.append(file_event)
+                self.save_security_log()
+            except Exception as e2:
+                print(f"⚠️ Failed to save security log to file: {e2}")
     
     def check_rate_limit(self, identifier):
         """Check if identifier is rate limited"""
@@ -64,7 +105,7 @@ class SecurityManager:
             if current_time - attempt < 3600
         ]
         
-        return len(self.failed_attempts[student_id]) >= SUSPICIOUS_ATTEMPT_THRESHOLD
+        return len(self.failed_attempts[student_id]) >= 899
     
     def record_failed_attempt(self, student_id):
         """Record a failed verification attempt"""
