@@ -31,11 +31,15 @@ def index():
 
 @config.route('/enroll')
 def enroll_page():
-    """Student enrollment page - Public but with teacher reference"""
-    teacher_id = request.args.get('teacher_id')
+    """Student enrollment page - Public with teacher reference or Teacher direct enrollment"""
     teacher = None
-    if teacher_id:
-        teacher = Teacher.query.get(teacher_id)
+    if current_user.is_authenticated:
+        teacher = current_user
+    else:
+        teacher_id = request.args.get('teacher_id')
+        if teacher_id:
+            teacher = Teacher.query.get(teacher_id)
+    
     return render_template('enroll.html', teacher=teacher)
 
 @config.route('/enroll_student', methods=['POST'])

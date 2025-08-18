@@ -47,7 +47,7 @@ uploads/
 voice_samples/
 *.log
 ll.txt
-
+README_AUTH.md
 # Voice models and data (these will be created on Heroku)
 voice_models.pkl
 attendance_records.json

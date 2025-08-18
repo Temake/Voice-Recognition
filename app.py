@@ -28,7 +28,6 @@ def create_app():
     app.config['ENV'] = os.environ.get('FLASK_ENV', 'production')
     app.config['DEBUG'] = os.environ.get('FLASK_ENV', 'production') == 'development'
     
-    # Initialize extensions
     db.init_app(app)
     bcrypt.init_app(app)
     

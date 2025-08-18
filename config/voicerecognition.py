@@ -278,7 +278,22 @@ class EnhancedVoiceRecognitionSystem:
         except Exception as e:
             print(f"❌ Error converting M4A to WAV: {e}")
             return None
-    
+        
+    def convert_mp3_to_wav(self,input_mp3_path):
+        try:
+            print(f"🔄 Converting MP3 to WAV: {input_mp3_path}")
+
+            audio = AudioSegment.from_file(input_mp3_path, format="mp3")
+            output_wav_path = input_mp3_path.rsplit('.', 1)[0] + '.wav'
+            audio.export(output_wav_path, format="wav")
+
+            print(f"✅ Conversion successful: {output_wav_path}")
+            return output_wav_path
+
+        except Exception as e:
+            print(f"❌ Error converting MP3 to WAV: {e}")
+            return None
+
     def enroll_student(self, student_id, student_name, audio_file_path):
         """Enhanced student enrollment with database and Cloudinary"""
         try:
@@ -380,8 +395,8 @@ class EnhancedVoiceRecognitionSystem:
                 "Multiple failed verification attempts detected"
             )
             return False, "Account temporarily locked due to suspicious activity", 0.0
-        
-        # Convert audio if needed
+
+        audio = self.convert_mp3_to_wav(audio_file) if audio_file.endswith('.mp3') else audio_file
         audio = self.convert_m4a_to_wav(audio_file) if audio_file.endswith('.m4a') else audio_file
         
         # Extract features from test audio

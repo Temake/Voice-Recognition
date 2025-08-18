@@ -1,10 +1,18 @@
 let mediaRecorder, audioChunks = [], audioBlob;
 let recordingTimer, startTime;
+let enrollmentLink = null;
 
 const recordBtn = document.getElementById('recordBtn');
 const voiceFileInput = document.getElementById('voice_sample');
 const enrollForm = document.querySelector('form');
 const timer = document.getElementById('timer');
+
+// Enrollment link elements
+const shareBtn = document.getElementById('shareBtn');
+const showLinkBtn = document.getElementById('showLinkBtn');
+const linkDisplay = document.getElementById('linkDisplay');
+const enrollmentLinkInput = document.getElementById('enrollmentLinkInput');
+const copyLinkBtn = document.getElementById('copyLinkBtn');
 
 // Audio config for librosa
 const audioConfig = { audio: { channelCount: 1, sampleRate: 22050, sampleSize: 16 } };
@@ -15,7 +23,177 @@ document.addEventListener('DOMContentLoaded', function() {
         recordBtn.className = 'bg-gray-400 text-white px-6 py-2 rounded-md font-medium cursor-not-allowed mb-4';
         recordBtn.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>Not supported';
     }
+    
+    // Initialize enrollment link functionality
+    initializeEnrollmentLink();
 });
+
+// Enrollment link functionality
+async function initializeEnrollmentLink() {
+    if (shareBtn) {
+        shareBtn.addEventListener('click', handleShareLink);
+    }
+    if (showLinkBtn) {
+        showLinkBtn.addEventListener('click', handleShowLink);
+    }
+    if (copyLinkBtn) {
+        copyLinkBtn.addEventListener('click', handleCopyLink);
+    }
+}
+
+async function handleShareLink() {
+    const originalHTML = shareBtn.innerHTML;
+    try {
+        shareBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Generating...';
+        shareBtn.disabled = true;
+        
+        await loadEnrollmentLink();
+        
+        if (enrollmentLink && navigator.clipboard) {
+            await navigator.clipboard.writeText(enrollmentLink);
+            
+            shareBtn.innerHTML = '<i class="fas fa-check mr-1"></i>Copied!';
+            shareBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+            shareBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            
+            showNotification('Enrollment link copied to clipboard!', 'success');
+            
+            setTimeout(() => {
+                shareBtn.innerHTML = originalHTML;
+                shareBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                shareBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                shareBtn.disabled = false;
+            }, 3000);
+        } else {
+            throw new Error('Clipboard not supported or link generation failed');
+        }
+    } catch (error) {
+        console.error('Error sharing link:', error);
+        shareBtn.innerHTML = '<i class="fas fa-exclamation-triangle mr-1"></i>Error';
+        shareBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+        shareBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        
+        showNotification('Failed to generate share link. Please try again.', 'error');
+        
+        setTimeout(() => {
+            shareBtn.innerHTML = originalHTML;
+            shareBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+            shareBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            shareBtn.disabled = false;
+        }, 3000);
+    }
+}
+
+async function handleShowLink() {
+    const originalHTML = showLinkBtn.innerHTML;
+    try {
+        showLinkBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Loading...';
+        showLinkBtn.disabled = true;
+        
+        await loadEnrollmentLink();
+        
+        enrollmentLinkInput.value = enrollmentLink || 'Failed to load link';
+        linkDisplay.classList.remove('hidden');
+        
+        showLinkBtn.innerHTML = '<i class="fas fa-eye-slash mr-1"></i>Hide Link';
+        showLinkBtn.onclick = hideLink;
+        
+    } catch (error) {
+        console.error('Error loading link:', error);
+        showNotification('Failed to load enrollment link.', 'error');
+        showLinkBtn.innerHTML = originalHTML;
+    } finally {
+        showLinkBtn.disabled = false;
+    }
+}
+
+function hideLink() {
+    linkDisplay.classList.add('hidden');
+    showLinkBtn.innerHTML = '<i class="fas fa-eye mr-1"></i>Show Link';
+    showLinkBtn.onclick = handleShowLink;
+}
+
+async function handleCopyLink() {
+    const originalHTML = copyLinkBtn.innerHTML;
+    try {
+        if (enrollmentLink && navigator.clipboard) {
+            await navigator.clipboard.writeText(enrollmentLink);
+            
+            copyLinkBtn.innerHTML = '<i class="fas fa-check"></i>';
+            copyLinkBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+            copyLinkBtn.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+            
+            showNotification('Link copied to clipboard!', 'success');
+            
+            setTimeout(() => {
+                copyLinkBtn.innerHTML = originalHTML;
+                copyLinkBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                copyLinkBtn.classList.add('bg-gray-600', 'hover:bg-gray-700');
+            }, 2000);
+        } else {
+            throw new Error('Clipboard not supported or no link available');
+        }
+    } catch (error) {
+        console.error('Error copying link:', error);
+        showNotification('Failed to copy link to clipboard.', 'error');
+    }
+}
+
+async function loadEnrollmentLink() {
+    if (enrollmentLink) return enrollmentLink;
+    
+    try {
+        const response = await fetch('/share_link');
+        const data = await response.json();
+        
+        if (data.success) {
+            enrollmentLink = data.enrollment_link;
+            return enrollmentLink;
+        } else {
+            throw new Error(data.message || 'Failed to generate enrollment link');
+        }
+    } catch (error) {
+        console.error('Error loading enrollment link:', error);
+        throw error;
+    }
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 
+                   type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 
+                   'bg-blue-50 border-blue-200 text-blue-800';
+    
+    const icon = type === 'success' ? 'fa-check-circle' : 
+                type === 'error' ? 'fa-exclamation-circle' : 
+                'fa-info-circle';
+    
+    notification.className = `fixed top-20 right-4 z-50 max-w-sm p-4 mb-4 rounded-md border ${bgColor} transform translate-x-full transition-transform duration-300 ease-in-out`;
+    notification.innerHTML = `
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas ${icon} mr-2"></i>
+                <span class="text-sm font-medium">${message}</span>
+            </div>
+            <button type="button" class="ml-4 text-gray-400 hover:text-gray-600 focus:outline-none" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+    
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 5000);
+}
 
 recordBtn.addEventListener('click', toggleRecording);
 
