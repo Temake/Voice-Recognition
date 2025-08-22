@@ -45,6 +45,7 @@ data/
 # Documentation
 README.md
 *.md
+venv
 
 # Git
 .git
