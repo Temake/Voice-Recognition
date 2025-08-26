@@ -10,28 +10,24 @@ from config.auth_routes import auth
 
 def create_app():
     app = Flask(__name__)
-    
-    # Production security configuration
+ 
     app.secret_key = os.environ.get('SECRET_KEY', 'ah)vh+hug0)fo^-82@3sq(z77$9^+3q($=+k)zvuvhjm^w@5p*')
-    
-    # Database configuration
+
     database_url = os.environ.get('DATABASE_URL')
     
-    app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///voice_attendance.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url if os.environ.get('FLASK_ENV') == 'production' else 'sqlite:///voice_attendance.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    
-    # Configure upload settings
+
     app.config['UPLOAD_FOLDER'] = os.environ.get('UPLOAD_FOLDER', 'voice_samples')
-    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload size
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  
     
-    # Production settings
+
     app.config['ENV'] = os.environ.get('FLASK_ENV', 'production')
     app.config['DEBUG'] = os.environ.get('FLASK_ENV', 'production') == 'development'
     
     db.init_app(app)
     bcrypt.init_app(app)
     
-    # Initialize Flask-Login
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
@@ -55,7 +51,6 @@ def create_app():
     with app.app_context():
         db.create_all()
     
-    # Main route redirect based on authentication
     @app.route('/')
     def home():
         """Redirect based on authentication status"""
@@ -64,7 +59,6 @@ def create_app():
         else:
             return redirect(url_for('config.welcome'))
     
-    # Public enrollment route for students (no auth required)
     @app.route('/enroll')
     def public_enroll():
         """Public enrollment page for students"""

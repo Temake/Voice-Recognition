@@ -59,11 +59,10 @@ class CloudinaryService:
             public_id = f"voice_samples/{teacher_id}/{student_id}_{purpose}_{timestamp}"
             
             print(f"📤 Uploading to Cloudinary with public_id: {public_id}")
-            
-            # Upload with audio resource type
+       
             result = cloudinary.uploader.upload(
                 file_path,
-                resource_type="video",  # Use video for audio files
+                resource_type="video",  
                 public_id=public_id,
                 folder=f"voice_attendance/teacher_{teacher_id}",
                 tags=[f"teacher_{teacher_id}", f"student_{student_id}", purpose],

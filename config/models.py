@@ -48,14 +48,12 @@ class Student(db.Model):
     student_name = db.Column(db.String(100), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
     voice_features = db.Column(db.Text)  # JSON string of voice features
-    voice_sample_url = db.Column(db.String(500))  # Cloudinary URL
+    voice_sample_url = db.Column(db.String(500)) 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
     
-    # Composite unique constraint to prevent duplicate student IDs per teacher
     __table_args__ = (db.UniqueConstraint('student_id', 'teacher_id', name='unique_student_per_teacher'),)
-    
-    # Relationships
+
     attendance_records = db.relationship('AttendanceRecord', backref='student', lazy=True)
     
     def set_voice_features(self, features):
